@@ -1,0 +1,15 @@
+{
+  "phase": "P3",
+  "title": "Prove policy centralization (auto-load without wiring)",
+  "status": "complete",
+  "completed": "2026-11-09",
+  "method": "created policies/p11_test_autoload.rego (package governance, deny contains) with zero edits to main.rego or gate.sh",
+  "verification": {
+    "opa_eval": "data.governance.deny included 'P11-AUTOLOAD: policy p11 fired' (+ P5 UNRECOGNIZED-TOOL for the fake tool name) — package-level aggregation proven",
+    "gate_sh": "probe payload → exit 2, reason contains P11-AUTOLOAD",
+    "normal_tools": "exec 'echo still-works' allowed with p11 loaded",
+    "removal": "file deleted → P11-AUTOLOAD absent from deny; benign exec payload → gate exit 0"
+  },
+  "conclusion": "New policies auto-load via OPA --data policies/ directory load; no wiring required",
+  "cleanup": "p11_test_autoload.rego deleted after verification"
+}

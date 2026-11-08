@@ -1,0 +1,20 @@
+{
+  "phase": "P2",
+  "title": "Complete policies P2 test + P6-P10",
+  "status": "complete",
+  "completed": "2026-11-09",
+  "artifacts": [
+    "ci-test/.github/workflows/policy-lint.yml (P6)",
+    "ci-test/.github/workflows/secret-scan.yml (P7)",
+    "ci-test/.gitleaks.toml",
+    "docs/errors/ERR-012.md"
+  ],
+  "verification": {
+    "P6_workflows_merged": "ci-test PR #2 (squash fe7e5c1)",
+    "P6_negative_test": "ci-test PR #3 — 'Lint changed Rego policies' FAIL on bad .rego (147 lines, no # WHY:, duplicate package)",
+    "P7_config_merged": "ci-test PR #5 (squash caf5ade)",
+    "P7_negative_test": "ci-test PR #4 — 'Scan PR diff for secrets' FAIL, gitleaks 'leaks found: 1' on sk- token",
+    "note": "P6/P7 are CI-based, not runtime .rego policies — OPA cannot self-inspect (ERR-012). gitleaks defaults miss alphabet-sequence sk- tokens; custom rule added."
+  },
+  "cleanup": "test branches test/p6-bad-rego and test/p7-secret deleted; PRs #3/#4 closed"
+}

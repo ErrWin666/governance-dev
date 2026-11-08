@@ -1,0 +1,4 @@
+# Governance files — changes require owner approval
+policies/*.rego @ErrWin666
+policies/gate.sh @ErrWin666
+.github/ @ErrWin666

@@ -1,0 +1,10 @@
+title = "ci-test gitleaks config"
+
+[extend]
+useDefault = true
+
+[[rules]]
+id = "openai-style-api-key"
+description = "sk-<token> style API keys"
+regex = '''sk-[A-Za-z0-9]{20,}'''
+keywords = ["sk-"]

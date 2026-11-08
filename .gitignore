@@ -1,0 +1,7 @@
+logs/
+old-version/
+backups/
+*.bak
+.gate-env.*.json
+test.env
+ci-test/

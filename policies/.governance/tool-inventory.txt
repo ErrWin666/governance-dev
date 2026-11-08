@@ -1,0 +1,22 @@
+# Verified tool_name inventory — B1.0 + extension, session ubiquitous-headstand
+# Match against the LOGGED tool_name only (ERR-006). Entries ending in * are prefixes.
+# Owner exception path: approvals/approval.md, then append the name here.
+exec
+read
+edit
+write
+grep
+skill
+glob
+notebook_edit
+webfetch
+browser_preview
+close_browser_preview
+kill_shell
+run_subagent
+mcp_list_tools
+mcp__context7__resolve-library-id
+mcp__*
+web_search
+get_output
+todo_write

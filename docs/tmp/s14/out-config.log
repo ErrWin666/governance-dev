@@ -1,0 +1,5 @@
+error: the argument '--print [<PROMPT>]' cannot be used with '[PATH]...'
+
+Usage: devin.exe --print [<PROMPT>] --config <PATH> [PATH]... [-- <PROMPT>...]
+
+For more information, try '--help'.

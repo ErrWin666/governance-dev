@@ -1,0 +1,50 @@
+name: policy-lint
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  lint-rego:
+    name: Lint changed Rego policies
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install OPA
+        run: |
+          curl -sSfL -o "$RUNNER_TEMP/opa" \
+            https://github.com/open-policy-agent/opa/releases/download/v1.4.2/opa_linux_amd64_static
+          chmod +x "$RUNNER_TEMP/opa"
+          "$RUNNER_TEMP/opa" version
+
+      - name: Lint changed .rego files
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          set -u
+          failed=0
+          changed=$(git diff --name-only --diff-filter=ACMR "${BASE_SHA}...HEAD" -- '*.rego')
+          if [ -z "$changed" ]; then
+            echo "No .rego files changed - nothing to lint."
+            exit 0
+          fi
+          while IFS= read -r f; do
+            echo "--- $f"
+            lines=$(wc -l < "$f")
+            [ "$lines" -le 100 ] || { echo "::error file=$f::exceeds 100 lines ($lines)"; failed=1; }
+            head -n 1 "$f" | grep -q '^# WHY:' || { echo "::error file=$f::missing '# WHY:' header on line 1"; failed=1; }
+            pkgs=$(grep -cE '^package[[:space:]]' "$f")
+            [ "$pkgs" -eq 1 ] || { echo "::error file=$f::expected exactly 1 package declaration, found $pkgs"; failed=1; }
+            "$RUNNER_TEMP/opa" check "$f" || { echo "::error file=$f::opa check failed"; failed=1; }
+          done <<< "$changed"
+          if [ "$failed" -ne 0 ]; then
+            echo "::error::Policy lint failed - see annotations above."
+            exit 1
+          fi
+          echo "All changed .rego files passed policy lint."
