@@ -24,7 +24,7 @@ certain approaches failed.
 
 ## File locations
 - ERR-004..ERR-013: this directory
-- ERR-001..ERR-003: `مشروع اختبار/docs/errors/` (old-version project, Arabic)
+- ERR-001..ERR-003: `arabic-test-project/docs/errors/` (old-version project, Arabic)
 
 ## Template (use for new errors)
 Each ERR-XXX.md file should contain:

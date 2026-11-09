@@ -81,7 +81,7 @@ Details: [STATE.md](STATE.md).
 
 Archived outside the tree (recoverable, not deleted):
 C:/governance-dev-archive/ — old-version/, trash/, backups/,
-مشروع اختبار/ (earlier Arabic project, holds ERR-001..003),
+arabic-test-project/ (earlier Arabic project, holds ERR-001..003),
 ci-test/ (local clone of the CI testbed repo; re-clone from
 github.com/ErrWin666/ci-test if needed).
 

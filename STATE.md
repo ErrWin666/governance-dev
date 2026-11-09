@@ -82,7 +82,7 @@
 - ERR-015: L2 tool install fallbacks (arborist-metrics 404, muti junk,
   pyscn pip-not-Go, polyscan no-Python)
 - Full index: docs/errors/README.md (ERR-001..003 in the archived Arabic
-  project — now at C:/governance-dev-archive/مشروع اختبار/)
+  project — now at C:/governance-dev-archive/arabic-test-project/)
 
 ## 5. Next steps (in order — do not skip)
 1. ~~Complete documentation~~ — Phase 1 DONE

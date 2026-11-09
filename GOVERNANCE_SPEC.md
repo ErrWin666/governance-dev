@@ -1,288 +1,297 @@
 # GOVERNANCE_SPEC.md
-# مواصفة الحوكمة — الإصدار 2.0
-# تاريخ الإنشاء: [التاريخ] — رُفعت إلى v2.0 في 2026-11-09 (نُقلت إلى الجذر + تصحيحات موثقة أدناه)
-# المالك: [اسمك]
-# الحالة: مُعتمدة من المالك — مرجع ثابت لكل الجلسات
+# Governance Specification — Version 2.0
+# Created: [date] — bumped to v2.0 on 2026-11-09 (moved to repo root + documented corrections below)
+# Owner: [your name]
+# Status: Owner-approved — the fixed reference for every session
 #
-# سجل التصحيحات v1.0 → v2.0:
-# 1) نُقلت من docs/specs/ إلى جذر المستودع (الدستور مكانه الأعلى، لا مدفوناً).
-# 2) القاعدة 21 (Git-Bash إلزامي) — مُلغاة: بيئة التشغيل المعتمدة هي WSL
-#    (ADR-001, ERR-007). بقيت مؤرشفة أدناه للسجل التاريخي.
+# Correction log v1.0 → v2.0:
+# 1) Moved from docs/specs/ to the repo root (the constitution lives at the
+#    top of the tree, not buried).
+# 2) Rule 21 (mandatory Git-Bash runtime) — RETIRED: the runtime of record
+#    is WSL (ADR-001, ERR-007). Kept struck-through below for the record.
+# 3) Language: this document is now English-only (owner directive
+#    2026-11-09). The v1.x Arabic original is preserved in git history and
+#    at C:/governance-dev-archive/GOVERNANCE_SPEC-v1-arabic.md.
 
 ---
 
-## 0. الغرض من هذه الوثيقة
+## 0. Purpose of this document
 
-هذه الوثيقة هي **العقد الرسمي** بين المالك (أنا) وأي وكيل ذكاء اصطناعي (Devin أو غيره) يعمل على مشاريعي. أي عمل لا يلتزم بهذه المواصفة يُعتبر **غير معتمد**، بغض النظر عن جودة الكود أو سرعة التسليم.
+This document is the **formal contract** between the Owner (me) and any AI
+agent (Devin or other) working on my projects. Any work that does not comply
+with this specification is **unapproved**, regardless of code quality or
+delivery speed.
 
-**المبادئ الحاكمة:**
-1. **الفعل لا النية**: لا يُقبل ادعاء نجاح بدون دليل ملموس.
-2. **الفصل بين الأدوار**: لا دور يخطط وينفذ ويراجع ويعتمد في نفس الوقت.
-3. **القواعد من الخارج**: السياسات تُفرض من خارج الوكيل، لا تُطلب منه.
-4. **لا عمل بصمت**: كل خطوة تترك أثرًا، وكل فشل مرئي.
-5. **البساطة أولًا**: أقل تعقيد يفي بالغرض، وأقل عدد أدوار يغطي الوظائف.
-6. **البساطة المتناسبة**: الحوكمة تُقاس بحجم المشروع ومخاطره. لا تُشغّل آلية إلا إذا كانت فائدتها تفوق تكلفتها.
+**Governing principles:**
+1. **Action over intent**: no success claim is accepted without tangible evidence.
+2. **Separation of roles**: no role plans, executes, reviews, and approves at once.
+3. **Rules from outside**: policies are imposed on the agent externally, not requested of it.
+4. **No silent work**: every step leaves a trace; every failure is visible.
+5. **Simplicity first**: the least complexity that serves the purpose; the fewest roles that cover the functions.
+6. **Proportional simplicity**: governance scales to the project's size and risk. A mechanism runs only when its benefit outweighs its cost.
 
 ---
 
-## 1. دورة الحياة (Lifecycle) — 6 مراحل
+## 1. Lifecycle — 6 phases
 
-كل مشروع يمر بهذه المراحل بالترتيب. لا يُنتقل إلى مرحلة إلا بعد اجتياز بوابة المرحلة السابقة.
+Every project passes through these phases in order. No transition to a phase
+before passing the previous phase's gate.
 
-### P0 — الاستكشاف (Exploration)
+### P0 — Exploration
 
-| العنصر | التفاصيل |
+| Item | Details |
 |---|---|
-| **المدخلات** | فكرة المالك بلغته العادية |
-| **المخرج** | `docs/spec.md` (مواصفة كاملة) |
-| **الأدلة المطلوبة** | مواصفة موقعة + قائمة أسئلة مفتوحة + قائمة بدائل مدروسة |
-| **من ينفذ** | المنسق + الباحث |
-| **من يتحقق** | المالك (موافقة صريحة) |
-| **معايير القبول** | • المشكلة واضحة • المستخدم محدد • معايير القبول قابلة للاختبار • خارج النطاق محدد • البدائل موثقة • الأسئلة المفتوحة مُجابة أو مؤجلة بقرار |
+| **Inputs** | Owner's idea in their own words |
+| **Output** | `docs/spec.md` (complete spec) |
+| **Required evidence** | Signed spec + open-questions list + studied-alternatives list |
+| **Executed by** | Coordinator + Researcher |
+| **Verified by** | Owner (explicit approval) |
+| **Acceptance criteria** | • Problem is clear • User identified • Acceptance criteria testable • Out of scope defined • Alternatives documented • Open questions answered or deferred by decision |
 
-**قاعدة**: لا كود في هذه المرحلة. لا ملفات مشروع. فقط وثيقة المواصفة.
+**Rule**: no code in this phase. No project files. Only the spec document.
 
-### P1 — التوثيق المعماري (Architecture Documentation)
+### P1 — Architecture Documentation
 
-| العنصر | التفاصيل |
+| Item | Details |
 |---|---|
-| **المدخلات** | `docs/spec.md` المعتمدة |
-| **المخرج** | `docs/architecture/` (ADRs + مخططات C4 + هيكل مجلدات) |
-| **الأدلة المطلوبة** | • `adr/001-*.md`, `adr/002-*.md`, ... • `c4-context.mmd`, `c4-container.mmd` • `folder-structure.md` • `tech-stack.md` |
-| **من ينفذ** | المنسق + الكاتب |
-| **من يتحقق** | المدقق (اكتمال) + المشكك (تناقضات) |
-| **معايير القبول** | • كل قرار معماري له ADR • المخططات بصيغة Mermaid في Git • هيكل المجلدات محدد • التقنيات المختارة مبررة • لا قرار بدون "لماذا" |
+| **Inputs** | Approved `docs/spec.md` |
+| **Output** | `docs/architecture/` (ADRs + C4 diagrams + folder structure) |
+| **Required evidence** | • `adr/001-*.md`, `adr/002-*.md`, ... • `c4-context.mmd`, `c4-container.mmd` • `folder-structure.md` • `tech-stack.md` |
+| **Executed by** | Coordinator + Writer |
+| **Verified by** | Verifier (completeness) + Skeptic (contradictions) |
+| **Acceptance criteria** | • Every architectural decision has an ADR • Diagrams are Mermaid in Git • Folder structure defined • Chosen technologies justified • No decision without a "why" |
 
-**قاعدة**: المخططات تُكتب بصيغة نصية (Mermaid) وتُخزن في Git. لا صور خارجية.
+**Rule**: diagrams are written as text (Mermaid) and stored in Git. No external images.
 
-### P2 — البلوبرينت (Blueprint)
+### P2 — Blueprint
 
-| العنصر | التفاصيل |
+| Item | Details |
 |---|---|
-| **المدخلات** | `docs/architecture/` المعتمدة |
-| **المخرج** | `docs/blueprint/` (مخطط الدوال، التدفق، خطة الاختبارات) |
-| **الأدلة المطلوبة** | • `function-map.mmd` • `data-flow.mmd` • `test-plan.md` • `test-cases.md` |
-| **من ينفذ** | المنسق + الكاتب |
-| **من يتحقق** | المدقق + المشكك |
-| **معايير القبول** | • كل دالة رئيسية محددة بمدخلاتها ومخرجاتها • التدفق المنطقي مرسوم • خطة اختبارات تغطي: unit, integration, e2e, security • كل اختبار له معيار قبول |
+| **Inputs** | Approved `docs/architecture/` |
+| **Output** | `docs/blueprint/` (function map, flow, test plan) |
+| **Required evidence** | • `function-map.mmd` • `data-flow.mmd` • `test-plan.md` • `test-cases.md` |
+| **Executed by** | Coordinator + Writer |
+| **Verified by** | Verifier + Skeptic |
+| **Acceptance criteria** | • Every major function specified with inputs/outputs • Logical flow drawn • Test plan covers: unit, integration, e2e, security • Every test has an acceptance criterion |
 
-**قاعدة**: لا كود قبل اعتماد البلوبرينت. البلوبرينت هو "خريطة الطريق" التي يتبعها المنفذ.
+**Rule**: no code before the blueprint is approved. The blueprint is the "roadmap" the implementer follows.
 
-### P3 — التنفيذ (Implementation)
+### P3 — Implementation
 
-| العنصر | التفاصيل |
+| Item | Details |
 |---|---|
-| **المدخلات** | `docs/blueprint/` المعتمدة + `spec.hash` + `tests.hash` |
-| **المخرج** | كود + اختبارات + `evidence/P3/` |
-| **الأدلة المطلوبة** | • `git diff` للكود • `test-report.log` (كامل، غير ملخص) • `coverage-report.html` • `lint-report.log` • `sonarqube-report.json` • `evidence-manifest.json` |
-| **من ينفذ** | المنفذ (في VM معزولة) |
-| **من يتحقق** | المدقق (آلي) + المشكك (عينة) |
-| **معايير القبول** | • كل اختبار في `test-plan.md` موجود • التغطية ≥ 80% • لا أخطاء lint • SonarQube: لا issues من نوع Bug أو Vulnerability • حجم الملف ≤ 400 سطر • حجم الدالة ≤ 50 سطر • لا hardcoded secrets • `git diff` مطابق للبلوبرينت |
+| **Inputs** | Approved `docs/blueprint/` + `spec.hash` + `tests.hash` |
+| **Output** | Code + tests + `evidence/P3/` |
+| **Required evidence** | • `git diff` of the code • `test-report.log` (full, not summarized) • `coverage-report.html` • `lint-report.log` • `sonarqube-report.json` • `evidence-manifest.json` |
+| **Executed by** | Implementer (in isolated VM) |
+| **Verified by** | Verifier (automated) + Skeptic (sample) |
+| **Acceptance criteria** | • Every test in `test-plan.md` exists • Coverage ≥ 80% • No lint errors • SonarQube: no Bug or Vulnerability issues • File size ≤ 400 lines • Function size ≤ 50 lines • No hardcoded secrets • `git diff` matches the blueprint |
 
-**قواعد التنفيذ الصارمة:**
-- **ممنوع** تعديل ملفات الاختبار بعد `tests.hash` (يُكتشف عبر hash mismatch).
-- **ممنوع** كتابة كل شيء دفعة واحدة — العمل يُقسم إلى مهام صغيرة (كل مهمة ≤ 200 سطر تغيير).
-- **ممنوع** hardcoded secrets (يكتشفها gitleaks).
-- **ممنوع** تكرار المتغيرات (يكتشفه SonarQube duplication).
-- **ممنوع** تجاوز 400 سطر/ملف أو 50 سطر/دالة (يكتشفه سكربت CI).
-- **ممنوع** كود "يعمل" بدون اختبار (تغطية 0% = فشل).
-- **ممنوع** إصلاح كود مكسور بتعديل الاختبار (يُكتشف بـ hash).
+**Strict implementation rules:**
+- **Forbidden** to modify test files after `tests.hash` (detected via hash mismatch).
+- **Forbidden** to write everything at once — work is split into small tasks (each ≤ 200 lines changed).
+- **Forbidden** hardcoded secrets (detected by gitleaks).
+- **Forbidden** variable duplication (detected by SonarQube duplication).
+- **Forbidden** exceeding 400 lines/file or 50 lines/function (detected by CI script).
+- **Forbidden** "working" code without a test (0% coverage = failure).
+- **Forbidden** fixing broken code by editing the test (detected by hash).
 
-### P4 — الفحص الأمني (Security Audit)
+### P4 — Security Audit
 
-| العنصر | التفاصيل |
+| Item | Details |
 |---|---|
-| **المدخلات** | كود P3 + `evidence/P3/` |
-| **المخرج** | `evidence/P4/` (تقرير ثغرات + إصلاحات) |
-| **الأدلة المطلوبة** | • `sast-report.json` (SonarQube) • `dast-report.json` (ZAP baseline) • `secrets-scan.json` (gitleaks) • `dependency-check.json` • `threat-model.md` • `remediation.diff` |
-| **من ينفذ** | المهاجم (في VM معزولة) |
-| **من يتحقق** | المدقق + المالك |
-| **معايير القبول** | • لا vulnerabilities من نوع Critical/High دون إصلاح • كل إصلاح موثق في `remediation.diff` • threat model يغطي OWASP Top 10 • لا secrets مكشوفة • dependencies محدثة |
+| **Inputs** | P3 code + `evidence/P3/` |
+| **Output** | `evidence/P4/` (vulnerability report + remediations) |
+| **Required evidence** | • `sast-report.json` (SonarQube) • `dast-report.json` (ZAP baseline) • `secrets-scan.json` (gitleaks) • `dependency-check.json` • `threat-model.md` • `remediation.diff` |
+| **Executed by** | Attacker (in isolated VM) |
+| **Verified by** | Verifier + Owner |
+| **Acceptance criteria** | • No unremediated Critical/High vulnerabilities • Every fix documented in `remediation.diff` • Threat model covers OWASP Top 10 • No exposed secrets • Dependencies updated |
 
-**قاعدة**: المهاجم **لا يصلح** الثغرات بنفسه. يوثقها فقط، والمنفذ (في جولة جديدة) يصلحها. هذا يمنع تضارب المصالح.
+**Rule**: the Attacker **does not fix** vulnerabilities itself. It documents them only; the Implementer (in a new round) fixes them. This prevents conflicts of interest.
 
-### P5 — الاعتماد (Approval)
+### P5 — Approval
 
-| العنصر | التفاصيل |
+| Item | Details |
 |---|---|
-| **المدخلات** | كل `evidence/P0..P4/` + `evidence-manifest.json` |
-| **المخرج** | `evidence/P5/approval.md` + `release/` |
-| **الأدلة المطلوبة** | • `approval.md` موقّع من المالك • `release-manifest.json` • `changelog.md` |
-| **من ينفذ** | الكاتب + المدقق |
-| **من يتحقق** | المالك (موافقة نهائية إلزامية) |
-| **معايير القبول** | • كل المراحل السابقة معتمدة • حزمة الأدلة كاملة • المالك وافق صراحةً • لا أسئلة مفتوحة حرجة |
+| **Inputs** | All of `evidence/P0..P4/` + `evidence-manifest.json` |
+| **Output** | `evidence/P5/approval.md` + `release/` |
+| **Required evidence** | • `approval.md` signed by the Owner • `release-manifest.json` • `changelog.md` |
+| **Executed by** | Writer + Verifier |
+| **Verified by** | Owner (mandatory final approval) |
+| **Acceptance criteria** | • All previous phases approved • Evidence bundle complete • Owner explicitly approved • No critical open questions |
 
-**قاعدة**: لا إصدار بدون موافقة المالك الصريحة. الموافقة تُسجل في `approval.md` مع التاريخ والتوقيع.
+**Rule**: no release without the Owner's explicit approval. Approval is recorded in `approval.md` with date and signature.
 
-### الحوكمة المتناسبة (Proportional Governance)
+### Proportional governance
 
-| حجم المشروع | المراحل | الآليات | الأدوار |
+| Project size | Phases | Mechanisms | Roles |
 |---|---|---|---|
-| صغير (≤ 500 سطر) | P0، P3، P5 | M1، M2، M4، M8 | R1، R3، R4، R6 |
-| متوسط | P0–P5 | M1–M8 (بدون M6 إلا لتطبيق ويب) | كل ما عدا R5 (إلا عند الحاجة) |
-| كبير | P0–P5 + M6 | كل الآليات | كل الأدوار |
+| Small (≤ 500 lines) | P0, P3, P5 | M1, M2, M4, M8 | R1, R3, R4, R6 |
+| Medium | P0–P5 | M1–M8 (M6 only for web apps) | All except R5 (unless needed) |
+| Large | P0–P5 + M6 | All mechanisms | All roles |
 
 ---
 
-## 2. الأدوار (Roles) — 5 أدوار أساسية
+## 2. Roles — 5 core roles
 
-كل دور يعمل في **VM معزولة** (Managed Devin) أو **جلسة تنسيق** (المنسق). لا دور يرى ما لا يحتاجه.
+Each role works in an **isolated VM** (Managed Devin) or a **coordination
+session** (the Coordinator). No role sees what it does not need.
 
-### R1 — المنسق/الرقيب (Coordinator/Auditor)
+### R1 — Coordinator/Auditor
 
-- **المسؤولية**: فهم النية، التخطيط، توزيع المهام، مراقبة التقدم، توثيق القرارات، طلب موافقة المالك.
-- **لا يفعل**: لا ينفذ كودًا، لا يراجع كودًا، لا يعتمد نتائج.
-- **المدخلات**: كلام المالك، تقارير الأدوار الأخرى.
-- **المخرجات**: `docs/spec.md`، `phase-contracts/`، `coordination-log.md`، طلبات موافقة.
-- **العزل**: الجلسة الأم (تنسيق فقط، لا وصول لملفات المشروع مباشرة).
-- **معيار الجودة**: كل قرار موثق في `coordination-log.md` مع السبب.
+- **Responsibility**: understand intent, plan, dispatch tasks, monitor progress, document decisions, request owner approval.
+- **Does NOT**: implement code, review code, approve results.
+- **Inputs**: owner's words, other roles' reports.
+- **Outputs**: `docs/spec.md`, `phase-contracts/`, `coordination-log.md`, approval requests.
+- **Isolation**: the parent session (coordination only, no direct access to project files).
+- **Quality bar**: every decision documented in `coordination-log.md` with its reason.
 
-### R2 — الباحث (Researcher)
+### R2 — Researcher
 
-- **المسؤولية**: البحث عن أدوات، مكتبات، مشاريع مشابهة، أفضل الممارسات. توفير **Knowledge Base** للبقية.
-- **لا يفعل**: لا ينفذ، لا يعتمد، لا يقرر.
-- **المدخلات**: أسئلة من المنسق.
-- **المخرجات**: `knowledge/` (ملفات Markdown مع مصادر)، `docs/research/` (تقارير بحث).
-- **العزل**: VM معزولة (قراءة فقط + وصول للإنترنت).
-- **معيار الجودة**: كل معلومة لها مصدر (رابط + تاريخ).
+- **Responsibility**: search for tools, libraries, similar projects, best practices. Provide a **Knowledge Base** for the others.
+- **Does NOT**: implement, approve, decide.
+- **Inputs**: questions from the Coordinator.
+- **Outputs**: `knowledge/` (Markdown files with sources), `docs/research/` (research reports).
+- **Isolation**: isolated VM (read-only + internet access).
+- **Quality bar**: every piece of information has a source (link + date).
 
-### R3 — المنفذ (Implementer)
+### R3 — Implementer
 
-- **المسؤولية**: كتابة الكود والاختبارات وفق البلوبرينت، في مهام صغيرة.
-- **لا يفعل**: لا يراجع نفسه، لا يعدل الاختبارات، لا يعتمد عمله.
-- **المدخلات**: `docs/blueprint/`، `docs/spec.md`، `knowledge/`.
-- **المخرجات**: كود + اختبارات + `evidence/P3/`.
-- **العزل**: VM معزولة (كتابة في مجلد المشروع فقط).
-- **معيار الجودة**: كل مهمة ≤ 200 سطر تغيير، تغطية ≥ 80%، لا lint errors.
+- **Responsibility**: write code and tests per the blueprint, in small tasks.
+- **Does NOT**: review itself, edit tests, approve its own work.
+- **Inputs**: `docs/blueprint/`, `docs/spec.md`, `knowledge/`.
+- **Outputs**: code + tests + `evidence/P3/`.
+- **Isolation**: isolated VM (write access to the project folder only).
+- **Quality bar**: every task ≤ 200 lines changed, coverage ≥ 80%, no lint errors.
 
-### R4 — المدقق/المشكك (Verifier/Skeptic)
+### R4 — Verifier/Skeptic
 
-- **المسؤولية**: التحقق من الأدلة (المدقق) + البحث عن تناقضات (المشكك). دور مزدوج لكنهما يعملان بالتتابع.
-- **لا يفعل**: لا يكتب كودًا، لا يعتمد عمله، لا يثق بأي ادعاء بدون دليل.
-- **المدخلات**: `evidence/P<n>/`، الكود، الاختبارات.
-- **المخرجات**: `evidence/P<n>/verdict.md` (PASS/PARTIAL/FAIL + الأسباب).
-- **العزل**: VM معزولة (قراءة فقط).
-- **معيار الجودة**: كل حكم مدعوم بمرجع لأثر محدد (ملف، سطر، hash).
+- **Responsibility**: verify evidence (Verifier) + hunt contradictions (Skeptic). A dual role, but the two work sequentially.
+- **Does NOT**: write code, approve its own work, trust any claim without evidence.
+- **Inputs**: `evidence/P<n>/`, the code, the tests.
+- **Outputs**: `evidence/P<n>/verdict.md` (PASS/PARTIAL/FAIL + reasons).
+- **Isolation**: isolated VM (read-only).
+- **Quality bar**: every judgment backed by a reference to a concrete trace (file, line, hash).
 
-### R5 — المهاجم (Attacker)
+### R5 — Attacker
 
-- **المسؤولية**: اختبار الثغرات الأمنية (SAST/DAST/يدوي)، إنتاج تقرير ثغرات.
-- **لا يفعل**: لا يصلح الثغرات، لا يعتمد، لا يقرر.
-- **المدخلات**: كود P3.
-- **المخرجات**: `evidence/P4/` (تقارير + threat model).
-- **العزل**: VM معزولة (قراءة فقط + أدوات هجوم).
-- **معيار الجودة**: كل ثغرة مصنفة (CVSS)، مع سيناريو استغلال، مع اقتراح إصلاح.
+- **Responsibility**: security testing (SAST/DAST/manual), produce a vulnerability report.
+- **Does NOT**: fix vulnerabilities, approve, decide.
+- **Inputs**: P3 code.
+- **Outputs**: `evidence/P4/` (reports + threat model).
+- **Isolation**: isolated VM (read-only + attack tools).
+- **Quality bar**: every vulnerability classified (CVSS), with an exploit scenario and a proposed fix.
 
-### R6 — الكاتب/الاستشاري (Writer/Consultant)
+### R6 — Writer/Consultant
 
-- **المسؤولية**: صياغة الملخص النهائي من الأدلة، تقديم رأي خبير (استشاري) عند الحاجة.
-- **لا يفعل**: لا يضيف ادعاءات غير موجودة في الأدلة، لا يقرر، لا ينفذ.
-- **المدخلات**: كل `evidence/`.
-- **المخرجات**: `evidence/P5/summary.md`، `release/changelog.md`.
-- **العزل**: VM معزولة (قراءة فقط).
-- **معيار الجودة**: كل جملة في الملخص لها مرجع في الأدلة.
+- **Responsibility**: draft the final summary from evidence, give expert opinion (consultant) when needed.
+- **Does NOT**: add claims not present in the evidence, decide, implement.
+- **Inputs**: all of `evidence/`.
+- **Outputs**: `evidence/P5/summary.md`, `release/changelog.md`.
+- **Isolation**: isolated VM (read-only).
+- **Quality bar**: every sentence in the summary has a reference in the evidence.
 
 ---
 
-## 3. الآليات (Mechanisms) — 9 آليات إلزامية
+## 3. Mechanisms — 9 mandatory mechanisms
 
-### M1 — عقد المرحلة (Phase Contract)
-- **الوصف**: وثيقة مكتوبة قبل بدء كل مرحلة تحدد: المدخلات، المخرجات، الأدلة، معايير القبول.
-- **الموقع**: `phase-contracts/P<n>-contract.md`.
-- **الإلزام**: لا مرحلة تبدأ بدون عقد معتمد من المالك.
-- **التحقق**: المدقق يتحقق أن كل بند في العقد مستوفى.
+### M1 — Phase Contract
+- **Description**: a written document before each phase defining: inputs, outputs, evidence, acceptance criteria.
+- **Location**: `phase-contracts/P<n>-contract.md`.
+- **Mandatory**: no phase starts without an owner-approved contract.
+- **Verification**: the Verifier checks that every contract item is satisfied.
 
-### M2 — حزمة الأدلة (Evidence Bundle)
-- **الوصف**: مجلد `evidence/P<n>/` يحتوي كل الأدلة + `manifest.json` (قائمة الملفات + hashes).
-- **الإلزام**: لا مرحلة تُعتبر مكتملة بدون حزمة أدلة كاملة.
-- **التحقق**: المدقق يتحقق من الـ manifest (كل ملف موجود، hash مطابق).
+### M2 — Evidence Bundle
+- **Description**: folder `evidence/P<n>/` holding all evidence + `manifest.json` (file list + hashes).
+- **Mandatory**: no phase counts as complete without a complete evidence bundle.
+- **Verification**: the Verifier checks the manifest (every file present, hash matching).
 
-### M3 — المواصفة المجمّدة (Frozen Spec)
-- **الوصف**: `spec.hash` (SHA-256 للمواصفة) يُسجل في `spec.lock` خارج مجلد العمل (مثل `~/.governance/spec.lock`).
-- **الإلزام**: أي تعديل على المواصفة يتطلب تحديث الـ hash + موافقة المالك.
-- **التحقق**: قبل كل مرحلة، يُعاد حساب الـ hash ويُقارن. أي اختلاف = توقف.
+### M3 — Frozen Spec
+- **Description**: `spec.hash` (SHA-256 of the spec) recorded in `spec.lock` outside the work folder (e.g. `~/.governance/spec.lock`).
+- **Mandatory**: any spec edit requires updating the hash + owner approval.
+- **Verification**: before each phase, the hash is recomputed and compared. Any difference = stop.
 
-### M4 — تجميد الاختبارات (Test Freeze)
-- **الوصف**: `tests.hash` (SHA-256 لكل ملف اختبار) يُسجل في `tests.lock`.
-- **الإلزام**: لا تعديل على ملفات الاختبار بعد التجميد دون موافقة المالك.
-- **التحقق**: CI يتحقق من الـ hash قبل كل تشغيل. أي اختلاف = فشل البناء.
-- **الاستثناء**: إضافة اختبارات جديدة مسموحة (لا تُعدل الموجودة).
+### M4 — Test Freeze
+- **Description**: `tests.hash` (SHA-256 of every test file) recorded in `tests.lock`.
+- **Mandatory**: no test-file edits after freezing without owner approval.
+- **Verification**: CI checks the hash before every run. Any difference = build failure.
+- **Exception**: adding new tests is allowed (existing ones may not be edited).
 
-### M5 — بوابة السياسة (Policy Gate)
-- **الوصف**: OPA (مثبت) يُستخدم كـ PDP (محرك قرار). كل استدعاء أداة يمر عبر `opa eval`.
-- **الإلزام**: لا استدعاء أداة بدون قرار `allow` من OPA.
-- **السياسات الأولية**:
-  - `deny_wsl_root`: منع `wsl -u root` (يُكشف عبر تحليل `tool_input`).
-  - `deny_test_edit`: منع تعديل ملفات الاختبار بعد التجميد.
-  - `deny_secrets`: منع كتابة مفاتيح/كلمات مرور في الكود.
-  - `require_evidence`: منع الانتقال بين المراحل بدون حزمة أدلة.
-- **التحقق**: hook `PreToolUse` يستدعي OPA قبل كل أداة.
+### M5 — Policy Gate
+- **Description**: OPA (installed) used as a PDP (decision engine). Every tool call goes through `opa eval`.
+- **Mandatory**: no tool call without an `allow` decision from OPA.
+- **Initial policies**:
+  - `deny_wsl_root`: block `wsl -u root` (detected via `tool_input` analysis).
+  - `deny_test_edit`: block test-file edits after freezing.
+  - `deny_secrets`: block writing keys/passwords into code.
+  - `require_evidence`: block phase transitions without an evidence bundle.
+- **Verification**: a `PreToolUse` hook calls OPA before every tool.
 
-### M6 — الفحص الأمني (Security Scan)
-- **الوصف**: فحص آلي إلزامي في P4.
-- **الأدوات**:
-  - SonarQube (لديك حاوية): SAST + code smells + duplication + hardcoded secrets.
-  - OWASP ZAP baseline: DAST للتطبيقات الويب.
-  - gitleaks: كشف secrets في git history.
+### M6 — Security Scan
+- **Description**: mandatory automated scan in P4.
+- **Tools**:
+  - SonarQube (you have a container): SAST + code smells + duplication + hardcoded secrets.
+  - OWASP ZAP baseline: DAST for web applications.
+  - gitleaks: secrets detection in git history.
   - `npm audit` / `pip-audit`: dependencies.
-- **الإلزام**: لا اعتماد P5 بدون تقرير أمني نظيف (لا Critical/High).
-- **التحقق**: المدقق يراجع التقارير + المالك يعتمد.
+- **Mandatory**: no P5 approval without a clean security report (no Critical/High).
+- **Verification**: the Verifier reviews reports + the Owner approves.
 
-### M7 — سجل الأخطاء (Error Registry)
-- **الوصف**: `docs/errors/ERR-<id>.md` لكل خطأ (الوصف، السبب الجذري، الإصلاح، اختبار الانحدار).
-- **الإلزام**: كل خطأ جديد يُوثق + يُضاف اختبار انحدار.
-- **التحقق**: CI يتحقق أن كل خطأ في السجل له اختبار مقابل.
+### M7 — Error Registry
+- **Description**: `docs/errors/ERR-<id>.md` per error (description, root cause, fix, regression test).
+- **Mandatory**: every new error is documented + a regression test added.
+- **Verification**: CI checks every registry error has a matching test.
 
-### M8 — موافقة المالك (Owner Approval)
-- **الوصف**: نقطة توقف إلزامية في P0 (اعتماد المواصفة) و P5 (اعتماد الإصدار).
-- **الإلزام**: لا انتقال بدون موافقة صريحة مسجلة.
-- **التحقق**: `air-gate` أو checkpoint في workflow يطلب الموافقة.
-- **التسجيل**: `approval.md` مع التاريخ + التوقيع (نصي أو hash).
+### M8 — Owner Approval
+- **Description**: mandatory checkpoint at P0 (spec approval) and P5 (release approval).
+- **Mandatory**: no transition without recorded explicit approval.
+- **Verification**: `air-gate` or a workflow checkpoint requesting approval.
+- **Recording**: `approval.md` with date + signature (text or hash).
 
-### M9 — قاعدة المعرفة (Knowledge Base)
-- **الوصف**: `knowledge/` (ملفات Markdown من الباحث) + `knowledge/index.json` (فهرس).
-- **الإلزام**: كل مهمة جديدة تستشير `knowledge/` أولًا قبل البحث.
-- **التحقق**: المنسق يتحقق أن كل قرار يستشير Knowledge Base.
+### M9 — Knowledge Base
+- **Description**: `knowledge/` (Markdown files from the Researcher) + `knowledge/index.json` (index).
+- **Mandatory**: every new task consults `knowledge/` before searching.
+- **Verification**: the Coordinator checks that every decision consults the Knowledge Base.
 
 ---
 
-## 4. القواعد الصارمة (Non-Negotiable Rules)
+## 4. Non-negotiable rules
 
-هذه القواعد **لا تُفاوض**. أي انتهاك = فشل المرحلة.
+These rules are **non-negotiable**. Any violation = phase failure.
 
-| # | القاعدة | كيف تُفرض |
+| # | Rule | How enforced |
 |---|---|---|
-| 1 | لا مراجعة ذاتية | المدقق دور منفصل، لا يكتب كودًا |
-| 2 | لا ادعاء نجاح بلا دليل | حزمة أدلة إلزامية لكل مرحلة |
-| 3 | لا تعديل اختبارات لإرضاء كود مكسور | `tests.hash` + CI check |
-| 4 | لا هاردكود secrets | gitleaks + SonarQube + OPA |
-| 5 | لا ملف > 400 سطر | سكربت CI |
-| 6 | لا دالة > 50 سطر | سكربت CI |
-| 7 | لا تكرار متغيرات | SonarQube duplication |
-| 8 | لا كود بلا اختبار | coverage gate (≥80%) |
-| 9 | لا مواصفة متغيرة بصمت | `spec.hash` + تحقق قبل كل مرحلة |
-| 10 | لا عمل بصمت | كل خطوة في `coordination-log.md` |
-| 11 | لا فشل صامت | كل خطأ في `error-registry` |
-| 12 | لا انتقال بلا عقد مرحلة | `phase-contract` معتمد |
-| 13 | لا اعتماد بلا موافقة المالك | `air-gate` + `approval.md` |
-| 14 | لا بناء من الصفر لما هو موجود | الباحث يستشير Knowledge Base + أدوات جاهزة |
-| 15 | لا إعادة كتابة مشروع قائم | العمل الإضافي يبدأ من `docs/` الحالية + `git log` |
-| 16 | لا أوفرانجينيرنغ | المشروع الصغير يبدأ بالحد الأدنى (M1، M2، M4، M8)، ويُضاف الباقي عند الحاجة فقط |
-| 17 | CI هو مصدر أدلة pass/fail الوحيد | أي ادعاء نجاح/فشل يُقبل فقط من artefact منتج في CI خارجي موقّع؛ ملفات يكتبها الوكيل ليست دليلاً |
-| 18 | التنفيذ المحلي = كشف لا منع | الاعتراض المحلي (hooks/OPA) يكشف ويسجّل؛ المنع الحقيقي يعيش في Managed Devins + CI فقط |
-| 19 | `size:` إلزامي في عقد المرحلة | كل phase-contract يعلن حجم المشروع (صغير/متوسط/كبير) — يفعّل الجدول المتناسب ولا يُقبل بدونه |
-| 20 | مراحل البناء تتبع M8 | GOVERNANCE_BUILD_PLAN نفسه يخضع للموافقة — لا انتقال بين مراحل بناء (B<n>) بدون موافقة مالك مسجلة في `approvals/` |
-| ~~21~~ | ~~بيئة تشغيل واحدة إلزامية (Single-Environment Mandate)~~ — **مُلغاة** | كانت تفرض Git Bash فقط؛ أُلغيت لأن Git Bash أثبت عدم موثوقيته (cygheap fork failures, ERR-007) وبيئة التشغيل المعتمدة صارت WSL رسمياً (ADR-001). بقاياها: سياسات مثل `wsl -u root` (P1) تبقى سارية |
+| 1 | No self-review | Verifier is a separate role; writes no code |
+| 2 | No success claim without evidence | Mandatory evidence bundle per phase |
+| 3 | No editing tests to satisfy broken code | `tests.hash` + CI check |
+| 4 | No hardcoded secrets | gitleaks + SonarQube + OPA |
+| 5 | No file > 400 lines | CI script |
+| 6 | No function > 50 lines | CI script |
+| 7 | No variable duplication | SonarQube duplication |
+| 8 | No code without a test | coverage gate (≥80%) |
+| 9 | No silently changing spec | `spec.hash` + check before each phase |
+| 10 | No silent work | every step in `coordination-log.md` |
+| 11 | No silent failure | every error in `error-registry` |
+| 12 | No transition without a phase contract | approved `phase-contract` |
+| 13 | No approval without owner sign-off | `air-gate` + `approval.md` |
+| 14 | No building from scratch what exists | Researcher consults Knowledge Base + ready tools |
+| 15 | No rewriting an existing project | additive work starts from current `docs/` + `git log` |
+| 16 | No over-engineering | small projects start minimal (M1, M2, M4, M8); the rest added only when needed |
+| 17 | CI is the only source of pass/fail evidence | any success/failure claim is accepted only from a signed artefact produced in external CI; agent-written files are not evidence |
+| 18 | Local interception = detection, not prevention | local interception (hooks/OPA) detects and logs; real prevention lives only in Managed Devins + CI |
+| 19 | `size:` is mandatory in the phase contract | every phase-contract declares project size (small/medium/large) — activates the proportional table; not accepted without it |
+| 20 | Build phases follow M8 | GOVERNANCE_BUILD_PLAN itself is subject to approval — no transition between build phases (B<n>) without a recorded owner approval in `approvals/` |
+| ~~21~~ | ~~Mandatory single runtime (Single-Environment Mandate)~~ — **RETIRED** | Required Git Bash only; retired because Git Bash proved unreliable (cygheap fork failures, ERR-007) and the runtime of record became WSL (ADR-001). Its spirit survives: policies like `wsl -u root` (P1) remain in force |
 
 ---
 
-## 5. هيكل المشروع (Project Structure)
+## 5. Project structure
 
 ```
 project-root/
-├── GOVERNANCE_SPEC.md          ← هذه الوثيقة
+├── GOVERNANCE_SPEC.md          ← this document (repo root)
 ├── docs/
-│   ├── spec.md                 ← مواصفة P0
+│   ├── spec.md                 ← P0 spec
 │   ├── architecture/
 │   │   ├── adr/                ← ADRs
 │   │   ├── c4-context.mmd
@@ -294,10 +303,10 @@ project-root/
 │   │   ├── data-flow.mmd
 │   │   ├── test-plan.md
 │   │   └── test-cases.md
-│   ├── errors/                 ← سجل الأخطاء
+│   ├── errors/                 ← error registry
 │   │   ├── ERR-001.md
 │   │   └── ...
-│   └── research/               ← تقارير الباحث
+│   └── research/               ← researcher reports
 ├── knowledge/                  ← Knowledge Base
 │   ├── index.json
 │   └── *.md
@@ -314,166 +323,168 @@ project-root/
 │   ├── P5/
 │   └── manifest.json
 ├── locks/
-│   ├── spec.lock               ← hash المواصفة
-│   └── tests.lock              ← hash الاختبارات
-├── coordination-log.md         ← سجل كل قرار
+│   ├── spec.lock               ← spec hash
+│   └── tests.lock              ← tests hash
+├── coordination-log.md         ← log of every decision
 ├── approvals/
-│   └── approval.md             ← موافقة المالك
-└── src/                        ← الكود
+│   └── approval.md             ← owner approval
+└── src/                        ← the code
     └── tests/
 ```
 
 ---
 
-## 6. سير العمل (Workflow) — مثال عملي
+## 6. Workflow — worked example
 
-**المالك يريد مشروعًا جديدًا:**
+**The owner wants a new project:**
 
-1. **المالك** يكتب الفكرة في الجلسة الأم.
-2. **المنسق** يستدعي **الباحث** لفهم المجال + البحث عن أدوات جاهزة.
-3. **المنسق** يكتب `docs/spec.md` + `phase-contracts/P0-contract.md`.
-4. **المالك** يراجع المواصفة ويوافق (M8).
-5. **المنسق** ينشئ `locks/spec.lock` (M3).
-6. **المنسق** يوزع على **الكاتب** لكتابة `docs/architecture/`.
-7. **المدقق** يتحقق من اكتمال P1، **المشكك** يبحث عن تناقضات.
-8. **المنسق** يوثق في `coordination-log.md` وينتقل لـ P2.
-9. **الكاتب** يكتب `docs/blueprint/` + `docs/blueprint/test-plan.md`.
-10. **المنسق** ينشئ `locks/tests.lock` (M4) — بعد اعتماد خطة الاختبارات.
-11. **المنفذ** ينفذ في VM معزولة، مهمة تلو الأخرى، ينتج `evidence/P3/`.
-12. **المدقق** يتحقق من الأدلة آليًا (OPA + CI + manifests).
-13. **المهاجم** يفحص أمنيًا، ينتج `evidence/P4/`.
-14. **المنفذ** يصلح الثغرات في جولة جديدة، **المهاجم** يتحقق.
-15. **الكاتب** يصوغ `evidence/P5/summary.md`.
-16. **المالك** يراجع كل الأدلة ويوافق (M8).
-17. **الكاتب** ينتج `release/`.
-
----
-
-## 7. التعلم من الأخطاء (Learning Loop)
-
-**كل خطأ يمر بهذه الدورة:**
-
-1. **الكشف**: خطأ يُكتشف (اختبار فاشل، فحص أمني، مراجعة).
-2. **التسجيل**: يُوثق في `docs/errors/ERR-<id>.md`:
-   - الوصف
-   - السبب الجذري (root cause)
-   - الإصلاح المطبق
-   - اختبار الانحدار (regression test)
-3. **الاختبار**: يُضاف اختبار انحدار في `tests/regression/ERR-<id>.test.*`.
-4. **التحقق**: CI يتأكد أن الاختبار يفشل قبل الإصلاح وينجح بعده (إذا أمكن).
-5. **القاعدة**: إذا تكرر الخطأ، تُضاف قاعدة جديدة في `GOVERNANCE_SPEC.md` (قسم 4).
-6. **المراجعة الدورية**: كل 10 أخطاء، مراجعة للأنماط المتكررة.
-
-**قاعدة صارمة**: لا خطأ يُغلق بدون اختبار انحدار. لا استثناءات.
+1. **Owner** writes the idea in the parent session.
+2. **Coordinator** calls the **Researcher** to understand the domain + find ready tools.
+3. **Coordinator** writes `docs/spec.md` + `phase-contracts/P0-contract.md`.
+4. **Owner** reviews the spec and approves (M8).
+5. **Coordinator** creates `locks/spec.lock` (M3).
+6. **Coordinator** dispatches the **Writer** to write `docs/architecture/`.
+7. **Verifier** checks P1 completeness, **Skeptic** hunts contradictions.
+8. **Coordinator** logs in `coordination-log.md` and moves to P2.
+9. **Writer** writes `docs/blueprint/` + `docs/blueprint/test-plan.md`.
+10. **Coordinator** creates `locks/tests.lock` (M4) — after the test plan is approved.
+11. **Implementer** executes in an isolated VM, task by task, producing `evidence/P3/`.
+12. **Verifier** checks the evidence automatically (OPA + CI + manifests).
+13. **Attacker** runs security tests, produces `evidence/P4/`.
+14. **Implementer** fixes vulnerabilities in a new round, **Attacker** verifies.
+15. **Writer** drafts `evidence/P5/summary.md`.
+16. **Owner** reviews all evidence and approves (M8).
+17. **Writer** produces `release/`.
 
 ---
 
-## 8. التكملة على مشروع قائم (Incremental Development)
+## 7. Learning from errors (Learning Loop)
 
-عند إضافة ميزة لمشروع موجود:
+**Every error passes through this cycle:**
 
-1. **المنسق** يقرأ `docs/` الحالية + `coordination-log.md` + `git log`.
-2. **الباحث** يحدد ما هو موجود vs ما هو مطلوب.
-3. **المنسق** يكتب **مواصفة إضافية** (`docs/spec-addendum-<feature>.md`) — لا يعيد كتابة المواصفة الأصلية.
-4. **المنسق** ينشئ `phase-contract` جديدًا للميزة.
-5. بقية المراحل كما هي، لكن:
-   - الأدلة الجديدة تذهب إلى `evidence/<feature>/P<n>/`.
-   - `spec.lock` الأصلي يبقى، ويُنشأ `spec-addendum-<feature>.lock` جديد.
-   - `tests.lock` الأصلي يبقى، ويُنشأ `tests-addendum-<feature>.lock`.
-6. **ممنوع**: إعادة كتابة `src/` من الصفر. التعديلات تكون جراحية (surgical).
+1. **Detection**: an error is found (failing test, security scan, review).
+2. **Registration**: documented in `docs/errors/ERR-<id>.md`:
+   - Description
+   - Root cause
+   - Applied fix
+   - Regression test
+3. **Testing**: a regression test is added in `tests/regression/ERR-<id>.test.*`.
+4. **Verification**: CI confirms the test fails before the fix and passes after (where possible).
+5. **Rule**: if the error recurs, a new rule is added to `GOVERNANCE_SPEC.md` (section 4).
+6. **Periodic review**: every 10 errors, a review of recurring patterns.
+
+**Strict rule**: no error is closed without a regression test. No exceptions.
 
 ---
 
-## 9. حدود الثقة (Trust Boundaries)
+## 8. Incremental development (working on an existing project)
 
-| من | يثق في | لا يثق في |
+When adding a feature to an existing project:
+
+1. **Coordinator** reads the current `docs/` + `coordination-log.md` + `git log`.
+2. **Researcher** identifies what exists vs what is needed.
+3. **Coordinator** writes an **addendum spec** (`docs/spec-addendum-<feature>.md`) — does not rewrite the original spec.
+4. **Coordinator** creates a new phase-contract for the feature.
+5. The rest of the phases are unchanged, except:
+   - New evidence goes to `evidence/<feature>/P<n>/`.
+   - The original `spec.lock` stays; a new `spec-addendum-<feature>.lock` is created.
+   - The original `tests.lock` stays; a new `tests-addendum-<feature>.lock` is created.
+6. **Forbidden**: rewriting `src/` from scratch. Changes are surgical.
+
+---
+
+## 9. Trust boundaries
+
+| Who | Trusts | Does not trust |
 |---|---|---|
-| المالك | الأدلة الموقعة + تقارير المدقق | ادعاءات أي وكيل |
-| المنسق | تقارير الأدوار + الأدلة | كلام المنفذ عن نفسه |
-| الباحث | مصادره الموثقة | المعرفة غير الموثقة |
-| المنفذ | البلوبرينت + المواصفة | مراجعته الذاتية |
-| المدقق | الأدلة الملموسة | ادعاءات المنفذ |
-| المهاجم | الكود + أدوات الفحص | ادعاءات المنفذ بالأمان |
+| Owner | Signed evidence + verifier reports | any agent's claims |
+| Coordinator | Role reports + evidence | the implementer's word about itself |
+| Researcher | its documented sources | undocumented knowledge |
+| Implementer | the blueprint + the spec | its own self-review |
+| Verifier | tangible evidence | the implementer's claims |
+| Attacker | the code + scan tools | the implementer's security claims |
 
-**قاعدة**: كل تسليم بين دورين يمر عبر **أثر ملموس** (ملف، hash، تقرير)، وليس عبر محادثة.
+**Rule**: every handoff between two roles passes through a **tangible trace** (file, hash, report), never through conversation.
 
 ---
 
-## 10. ما لا يجب فعله (Anti-Patterns)
+## 10. Anti-patterns (what must not be done)
 
-| # | ممنوع | السبب |
+| # | Forbidden | Reason |
 |---|---|---|
-| 1 | جدار نصي (regex guards) كبديل عن عزل حقيقي | فشل مثبت تاريخيًا (WAFs) |
-| 2 | الاعتماد على "الوكيل سيلتزم" | النية ليست إثباتًا |
-| 3 | قبول "المدقق قال PASS" كدليل | يحتاج أثرًا ملموسًا |
-| 4 | بناء هوية منفصلة داخل نفس الحساب | مسرحية أمنية |
-| 5 | تكديس الطبقات (hook → gate → check → audit) | تعقيد يستعصى على المالك |
-| 6 | كتابة كل شيء دفعة واحدة | يمنع التحقق التدريجي |
-| 7 | تعديل الاختبارات لإرضاء كود مكسور | يخفي المشكلة |
-| 8 | إعادة كتابة مشروع قائم من الصفر | يهدر العمل السابق |
-| 9 | العمل بدون عقد مرحلة | يفتح باب الانتهاء الوهمي |
-| 10 | اعتماد بدون موافقة المالك | ينتهك المبدأ الأساسي |
+| 1 | Text walls (regex guards) as a substitute for real isolation | proven historical failure (WAFs) |
+| 2 | Relying on "the agent will comply" | intent is not proof |
+| 3 | Accepting "the Verifier said PASS" as evidence | needs a tangible trace |
+| 4 | Building a separate identity inside the same account | security theatre |
+| 5 | Stacking layers (hook → gate → check → audit) | complexity beyond the owner's grasp |
+| 6 | Writing everything at once | prevents incremental verification |
+| 7 | Editing tests to satisfy broken code | hides the problem |
+| 8 | Rewriting an existing project from scratch | wastes prior work |
+| 9 | Working without a phase contract | opens the door to fake completion |
+| 10 | Approving without owner sign-off | violates the core principle |
 
 ---
 
-## 11. مقاييس النجاح (Success Metrics)
+## 11. Success metrics
 
-| المقياس | الهدف | كيف يُقاس |
+| Metric | Target | How measured |
 |---|---|---|
-| نسبة المراحل المعتمدة بدون إعادة | ≥ 80% | `evidence/P<n>/verdict.md` |
-| نسبة الأخطاء التي لها اختبار انحدار | 100% | `docs/errors/` vs `tests/regression/` |
-| نسبة التغطية الاختبارية | ≥ 80% | `coverage-report.html` |
-| نسبة الثغرات الحرجة المصلحة | 100% | `evidence/P4/` |
-| نسبة الاعتمادات بدون موافقة المالك | 0% | `approvals/approval.md` |
-| نسبة تعديلات الاختبارات بعد التجميد | 0% | `locks/tests.lock` mismatch |
-| زمن العودة للمشروع (بعد انقطاع) | ≤ 10 دقائق | `coordination-log.md` |
+| Phases approved without rework | ≥ 80% | `evidence/P<n>/verdict.md` |
+| Errors with a regression test | 100% | `docs/errors/` vs `tests/regression/` |
+| Test coverage | ≥ 80% | `coverage-report.html` |
+| Critical vulnerabilities remediated | 100% | `evidence/P4/` |
+| Approvals without owner sign-off | 0% | `approvals/approval.md` |
+| Test edits after freezing | 0% | `locks/tests.lock` mismatch |
+| Time to resume a project (after a break) | ≤ 10 minutes | `coordination-log.md` |
 
 ---
 
-## 12. التوقيع
+## 12. Signature
 
-**المالك**: ________________  
-**التاريخ**: ________________  
-**الإصدار**: 1.0  
+**Owner**: ________________
+**Date**: ________________
+**Version**: 2.0
 
-أُقر بأنني قرأت هذه المواصفة وفهمتها، وأنها المرجع الثابت لكل عمل على مشاريعي.
-
----
-
-## ملحق أ: قائمة التحقق السريعة (Checklist)
-
-قبل أي عمل، تأكد:
-- [ ] `GOVERNANCE_SPEC.md` موجود في المشروع
-- [ ] `docs/spec.md` معتمد من المالك
-- [ ] `locks/spec.lock` موجود
-- [ ] `phase-contracts/P<n>-contract.md` معتمد
-- [ ] الأدوار محددة (من ينفذ، من يتحقق)
-- [ ] حزمة الأدلة (`evidence/P<n>/`) موجودة
-
-بعد أي عمل، تأكد:
-- [ ] `evidence/P<n>/manifest.json` محدث
-- [ ] `coordination-log.md` محدث
-- [ ] `docs/errors/` محدث (إن وُجد خطأ)
-- [ ] `locks/tests.lock` لم يتغير (إلا بإذن)
-- [ ] المالك وافق (إن كانت المرحلة تتطلب)
+I acknowledge that I have read and understood this specification, and that it
+is the fixed reference for all work on my projects.
 
 ---
 
-## ملحق ب: أدوات مساعدة (Tools)
+## Appendix A: Quick checklist
 
-| الأداة | الاستخدام | الحالة |
+Before any work, confirm:
+- [ ] `GOVERNANCE_SPEC.md` exists in the project
+- [ ] `docs/spec.md` approved by the owner
+- [ ] `locks/spec.lock` exists
+- [ ] `phase-contracts/P<n>-contract.md` approved
+- [ ] Roles defined (who executes, who verifies)
+- [ ] Evidence bundle (`evidence/P<n>/`) exists
+
+After any work, confirm:
+- [ ] `evidence/P<n>/manifest.json` updated
+- [ ] `coordination-log.md` updated
+- [ ] `docs/errors/` updated (if an error occurred)
+- [ ] `locks/tests.lock` unchanged (unless authorized)
+- [ ] Owner approved (if the phase requires it)
+
+---
+
+## Appendix B: Supporting tools
+
+| Tool | Use | Status |
 |---|---|---|
-| OPA | بوابة سياسة (PDP) | مثبت |
-| SonarQube | SAST + code quality | لديك حاوية |
-| gitleaks | كشف secrets | يحتاج تثبيت |
-| OWASP ZAP | DAST | يحتاج تثبيت |
-| cosign | توقيع artefacts | مثبت |
-| GitHub Attestations | provenance | جاهز عبر gh |
-| AEGIS | سجل غير قابل للتزوير | يحتاج تثبيت |
-| MJC | حكم خارجي | يحتاج تثبيت |
+| OPA | policy gate (PDP) | installed |
+| SonarQube | SAST + code quality | container available |
+| gitleaks | secrets detection | needs install |
+| OWASP ZAP | DAST | needs install |
+| cosign | artefact signing | installed |
+| GitHub Attestations | provenance | ready via gh |
+| AEGIS | tamper-proof log | needs install |
+| MJC | external adjudicator | needs install |
 
-*MJC: محكّم بنيوي حتمي — ليس نموذج LLM آخر؛ غير مثبت حالياً ويحتاج إعداداً وتفعيلاً قبل الاستخدام الفعلي.*
+*MJC: a deterministic structural adjudicator — not another LLM model; not
+currently installed and needs setup and activation before real use.*
 
 ---
 
-**نهاية المواصفة.**
+**End of specification.**
