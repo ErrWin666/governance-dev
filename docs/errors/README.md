@@ -21,9 +21,13 @@ certain approaches failed.
 | ERR-011 | sha256sum binary mode breaks gate.sh path parsing | environment | fixed (generate from WSL, -t flag) |
 | ERR-012 | P6/P7 are CI-based, not runtime policies — OPA cannot self-inspect | assumption | documented — use CI linters |
 | ERR-013 | gitleaks defaults miss alphabet-sequence secrets | assumption | fixed (custom rule, .gitleaks.toml) — Rule 30 |
+| ERR-014 | admin bypass deviation on governance-dev ruleset | spec gap | documented — dev-only exception, prod strict |
+| ERR-015 | L2 tool install fallbacks (arborist 404, muti junk, pyscn, polyscan) | assumption | documented — substitutes chosen |
+| ERR-016 | cold-session resume never tested | lifecycle | tested — see GAP-L3-04 |
+| ERR-017 | `pull_request.base.sha` frozen at PR-open → checks diffed polluted file set | infrastructure | resolved (base-toggle refreshes; PR #4+#5 merged) |
 
 ## File locations
-- ERR-004..ERR-013: this directory
+- ERR-004..ERR-017: this directory
 - ERR-001..ERR-003: `arabic-test-project/docs/errors/` (old-version project, Arabic)
 
 ## Template (use for new errors)

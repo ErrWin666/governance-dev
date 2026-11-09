@@ -41,12 +41,12 @@
 | ~~GAP-L3-01~~ ✅ CLOSED | spec/tasks restored to real committed content | — | — | — |
 | ~~GAP-L3-02~~ ✅ CLOSED | stub-certifying .approved hashes deleted; spec is unapproved until owner records A-003 | — | — | — |
 | GAP-L3-03 | No approvals/approval.md entry records the pgen spec/tasks approval | plan/README flow requires a record; hash files alone are not owner approval | add A-003 entry | YES |
-| GAP-L3-04 | Cold-session resume never tested (ERR-016) | This IS the ROADMAP L3 completion criterion — L3 cannot be called done without it | manual owner test | YES — run a fresh session |
+| GAP-L3-04 | Cold-session resume tested 2026-11-09: fresh session resumed the pilot from STATE.md/ERR-017/plan alone, diagnosed + shipped fixes, both PRs merged | Test ran; owner confirms closure | report in session log | YES — confirm |
 | GAP-L3-05 | spec-writer/task-decomposer skills never produced a verified real spec | "Skills loaded" ≠ "skills produce good output" | none | no |
 | ~~GAP-L3-06~~ ✅ CLOSED | evidence/P3/manifest.json restored from git (full Phase-3 proof) | — | — | — |
 | GAP-L3-07 | `current_phase=P4` but the pilot has no code (`src/` empty) | Phase marker is ahead of reality — P4's evidence check guards a phase that never happened | reset marker to P0 (owner-only file) | YES |
 | ~~GAP-L3-08~~ ✅ CLOSED | all L3 work committed (82874be + a7422f0) | — | — | — |
-| GAP-L3-09 | The pgen pilot never produced working software — L3 loop never ran end-to-end | Mechanism proven, lifecycle unproven | resume pilot or archive it | YES |
+| ~~GAP-L3-09~~ ✅ CLOSED | pgen pilot ran the full L3 loop: spec → A-003 seals → evidence/P0 → P4b-gated src/ writes → 11 tests → all required CI green → owner-merged PR #4 (2026-11-09) | — | — | — |
 
 ## L4 — Verification
 

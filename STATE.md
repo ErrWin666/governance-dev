@@ -41,6 +41,9 @@
   (fail-open seam in Devin hook contract)
 - WSL cold start / crash — fail_closed blocks but locks owner out
   (recovery = manual)
+- WSL `/usr/local/bin/opa` is a corrupt download (HTML 504 page, not a
+  binary) — `gate.sh` invokes `opa` from PATH → local gate degraded.
+  Reinstall required (ERR-017 session discovery)
 
 ## 3. Verified facts
 - Hook contract: exit 0=allow, 2=block, others=logged-not-blocking
@@ -60,6 +63,9 @@
   needs custom rule — .gitleaks.toml in ci-test (ERR-012)
 - pull_request workflows run from PR HEAD file, but actions/checkout uses
   the merge ref (head + latest base) — config files land via base merge
+- `pull_request.base.sha` is frozen at PR-open time; head pushes do NOT
+  refresh it. Refresh = `gh pr edit --base <other>` + back (ERR-017).
+  Workflows should compute merge-base, not trust the payload
 - Policy centralization PROVEN (Phase 3): any new policies/*.rego in
   package governance auto-loads via `opa eval --data policies/` — no
   main.rego/gate.sh edit. Convention for new policies:
@@ -81,6 +87,10 @@
 - ERR-014: admin bypass deviation on governance-dev (dev only; prod strict)
 - ERR-015: L2 tool install fallbacks (arborist-metrics 404, muti junk,
   pyscn pip-not-Go, polyscan no-Python)
+- ERR-016: cold-session resume untested → tested (GAP-L3-04)
+- ERR-017: stale pull_request.base.sha polluted PR diffs → resolved;
+  refresh via --base toggle; split p4 + lint bundle-check + A3 date-mask
+  landed (PR #5)
 - Full index: docs/errors/README.md (ERR-001..003 in the archived Arabic
   project — now at C:/governance-dev-archive/arabic-test-project/)
 
@@ -94,8 +104,9 @@
    evidence/P3/manifest.json
 4. L2 Quality Gate — PARTIAL (2026-11-09): A+B proven on PRs, C installed,
    D2 only of D1/D2/D3 proven; SonarQube dormant (docs/GAPS.md)
-5. Finish L3 proof: cold-session resume test + pilot (docs/GAPS.md
-   GAP-L3-04/09); then L4 verification — the missing core
+5. Finish L3 proof: pilot merged (PR #4, GAP-L3-09 closed); cold-resume
+   test ran this session (GAP-L3-04 — owner confirms); then L4
+   verification — the missing core
 6. Then L5 orchestration, L6 deployment (copier), spec v1.2 last
 - **Next phase**: close L3 + L2 proof gaps per docs/RECOVERY_PLAN.md;
   no L4 work until earlier-layer gaps are closed
@@ -142,3 +153,15 @@
   `docker exec sonarqube cat /opt/sonarqube/data/initial_admin_password`
 - CI broken: check `wsl gh api repos/ErrWin666/ci-test/rulesets/26814146`
   or `wsl gh api repos/ErrWin666/governance-dev/rulesets/26818941`
+## Pilot status (2026-11-09, final)
+- PR #4 (pilot/pgen) MERGED 21:00Z — first L3 lifecycle end-to-end:
+  spec → A-003 seals → evidence/P0 → P4b-permitted src/ writes → 11 tests →
+  full CI green → owner merge. GAP-L3-09 closed.
+- PR #5 (fix/p4-split-lint) MERGED 21:12Z — p4 split 103→54+56 lines;
+  policy-lint bundle-check; A3 ISO-date mask. Dogfooded: the PR's own
+  .rego changes passed the fixed lint.
+- ERR-017 resolved: stale pull_request.base.sha was the root cause;
+  refresh mechanism = --base toggle (documented in §3 + ERR-017).
+- Open carry-over: GAP-L3-07 (current_phase=P4 vs pilot=P0, owner file),
+  corrupt WSL opa binary (§2), base.sha→merge-base workflow hardening
+  (recommended, owner decision — ERR-017 remaining item 1).
