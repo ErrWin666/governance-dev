@@ -221,7 +221,7 @@ jobs:
           print("mutmut only_mutate:", src_files)
           PY
           mutmut run | tee "$TMPD/qg_mutrun.txt" || exit 1
-          mutmut export_cicd_stats || exit 1
+          mutmut export-cicd-stats || exit 1
           python3 - "$TMPD" <<'PY'
           import json, os, re, sys
           tmpd = sys.argv[1]
