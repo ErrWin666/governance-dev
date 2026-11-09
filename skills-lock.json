@@ -25,11 +25,29 @@
       "skillPath": "plugins/mutation-testing/skills/mutation-testing/SKILL.md",
       "computedHash": "3397f4ec4738e3e34bf423ed11e31efc0ae75a1bbb9155086170607a32312dc8"
     },
+    "planning-and-task-breakdown": {
+      "source": "addyosmani/agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/planning-and-task-breakdown/SKILL.md",
+      "computedHash": "0dc14a1402cdabd376f2d81d2225fcb4a18ee63d58b945ff83affeb024285b8f"
+    },
     "quality-gate": {
       "source": "simota/quality-skills",
       "sourceType": "github",
       "skillPath": "skills/quality-gate/SKILL.md",
       "computedHash": "a87af2279df1829a11299269d188cb9f01921722898dfae1ebaae0147ded45a4"
+    },
+    "session-handoff": {
+      "source": "softaworks/agent-toolkit",
+      "sourceType": "github",
+      "skillPath": "skills/session-handoff/SKILL.md",
+      "computedHash": "6401b3a156f4f756bb6faf54a633b3d092aea822115ef26858a8a6ce60b58a8e"
+    },
+    "spec-driven-development": {
+      "source": "addyosmani/agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/spec-driven-development/SKILL.md",
+      "computedHash": "6ecb6a4920d1ae2ce03b81d69a06e3855008c669082afd830bf2c49a5b44abf6"
     }
   }
 }
