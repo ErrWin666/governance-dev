@@ -31,6 +31,8 @@ check ("Verify test files are frozen"), a Ruleset protecting main
   CODEOWNERS on .github/ is mandatory, not optional
 - Ruleset/workflow changes require gh CLI (WSL-only) — added operational
   dependency
+- governance-dev uses admin bypass for dev speed; production projects
+  must use strict model — empty bypass + PR required (ERR-014, Rule 31)
 
 ## Alternatives considered
 - **Local enforcement only**: rejected — every local layer is detection-
