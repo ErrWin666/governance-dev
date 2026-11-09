@@ -142,11 +142,3 @@
   `docker exec sonarqube cat /opt/sonarqube/data/initial_admin_password`
 - CI broken: check `wsl gh api repos/ErrWin666/ci-test/rulesets/26814146`
   or `wsl gh api repos/ErrWin666/governance-dev/rulesets/26818941`
-## Pilot status (2026-11-09 late)
-- PR #4 pilot/pgen open: A-003 approved, evidence/P0 + src/ + tests committed, 11/11 local tests pass
-- Check failures DIAGNOSED (ERR-017): stale `pull_request.base.sha` kept diff
-  at 65 files; real findings = A8 `print(` in pgen.py + broken `importlinter.ini`
-  (risky_pkg placeholder). Both fixed on branch.
-- Next: push re-runs checks on true 3-file diff → owner merges → cold-resume
-  test (GAP-L3-04). GAP open: p4_require_evidence.rego is 103 lines > its own
-  100-line cap (owner decision: split or raise).

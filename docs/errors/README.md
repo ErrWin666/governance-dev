@@ -35,4 +35,3 @@ Each ERR-XXX.md file should contain:
 - Fix / Mitigation
 - Lesson
 - New rule (if applicable)
-- ERR-017: PR #4 pilot CI failures on clean 3-file diff — gates fired correctly; diagnosis pending (log reads: runs 42690704xxx). Own p4_require_evidence.rego is 104 lines > its own 100 cap — separate gap.
