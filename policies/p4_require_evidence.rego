@@ -10,7 +10,7 @@ import rego.v1
 
 # (a) transition records require some evidence to exist
 deny contains msg if {
-	input.tool_name in {"write", "edit"}
+	input.tool_name in {"write", "edit", "notebook_edit"}
 	p := norm(target_path)
 	is_transition_path(p)
 	not object.get(data.env, "evidence_present", false)
@@ -27,14 +27,14 @@ is_transition_path(p) if {
 
 # (b) src/ writes require evidence/P<current_phase-1>/manifest.json
 deny contains msg if {
-	input.tool_name in {"write", "edit"}
+	input.tool_name in {"write", "edit", "notebook_edit"}
 	contains(norm(target_path), "/src/")
 	not valid_current_phase
 	msg := "P4-NO-EVIDENCE: src/ write denied - current phase unset (fail closed)"
 }
 
 deny contains msg if {
-	input.tool_name in {"write", "edit"}
+	input.tool_name in {"write", "edit", "notebook_edit"}
 	contains(norm(target_path), "/src/")
 	valid_current_phase
 	not required_evidence in evidence_manifests

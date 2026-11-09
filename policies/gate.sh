@@ -19,6 +19,19 @@ command -v opa >/dev/null 2>&1 || {
 	exit 2
 }
 
+# (b) integrity seal: tampered policies = fail closed (GAP-L1-10, owner-sealed)
+if [ -f policies/.governance/policies.lock ]; then
+	EXP=$(tr -d ' 
+' < policies/.governance/policies.lock | tr 'A-F' 'a-f')
+	ACT=$(find policies -maxdepth 1 -type f \( -name '*.rego' -o -name 'gate.sh' \) -print0 | sort -z | xargs -0 cat | sha256sum | awk '{print $1}')
+	if [ -n "$EXP" ] && [ "$EXP" != "$ACT" ]; then
+		printf '%s DENY POLICIES-INTEGRITY lock mismatch
+' "$(date -Is)" >> "$GATE"
+		echo 'POLICIES-INTEGRITY: policies hash mismatch — tampered or re-seal needed' >&2
+		exit 2
+	fi
+fi
+
 INV=$(grep -v '^[[:space:]]*#' policies/.governance/tool-inventory.txt | sed '/^[[:space:]]*$/d' | jq -R . | jq -sc .)
 FT='[]'; TL=false
 if [ -f tests.lock ]; then TL=true; FT=$(awk '{print $NF}' tests.lock | jq -R . | jq -sc .); fi

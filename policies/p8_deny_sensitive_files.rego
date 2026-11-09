@@ -6,7 +6,7 @@ package governance
 import rego.v1
 
 deny contains msg if {
-	input.tool_name in {"write", "edit"}
+	input.tool_name in {"write", "edit", "notebook_edit"}
 	p := norm(target_path)
 	some pat in sensitive_patterns
 	sensitive_match(p, pat)
