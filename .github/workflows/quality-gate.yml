@@ -220,29 +220,23 @@ jobs:
           print("mutmut source_paths:", dirs)
           print("mutmut only_mutate:", src_files)
           PY
-          mutmut run || exit 1
-          mutmut results --all true > "$TMPD/qg_mutres.txt" || true
-          python3 - <<'PY'
-          import os, re, sys
-          tmp = os.environ.get('RUNNER_TEMP') or os.sep + 'tmp'
-          killed = checked = 0
-          statuses = {}
-          for line in open(os.path.join(tmp, 'qg_mutres.txt'), encoding='utf-8', errors='replace'):
-              m = re.search(r':\s*(\w+)\s*$', line.strip())
-              if not m:
-                  continue
-              st = m.group(1)
-              statuses[st] = statuses.get(st, 0) + 1
-              if st in {'killed', 'survived', 'no_tests', 'timeout', 'suspicious', 'segfault'}:
-                  checked += 1
-                  if st == 'killed':
-                      killed += 1
-          print("mutant statuses:", statuses)
-          if checked == 0:
+          mutmut run | tee "$TMPD/qg_mutrun.txt" || exit 1
+          mutmut export_cicd_stats || exit 1
+          python3 - "$TMPD" <<'PY'
+          import json, os, re, sys
+          tmpd = sys.argv[1]
+          s = json.load(open('mutants/mutmut-cicd-stats.json', encoding='utf-8'))
+          print("mutmut cicd stats:", s)
+          generated = 0
+          runlog = open(os.path.join(tmpd, 'qg_mutrun.txt'), encoding='utf-8', errors='replace').read()
+          for m in re.finditer(r'(\d+)/(\d+)', runlog):
+              generated = max(generated, int(m.group(2)))
+          tested = max(s['total'] - s['skipped'], generated - s['skipped'])
+          if tested <= 0:
               print("::notice::No mutants produced for changed files - passing.")
               sys.exit(0)
-          score = killed * 100 // checked
-          print(f"Mutation score on changed code: {score}% ({killed}/{checked} killed)")
+          score = (s['killed'] + s['timeout']) * 100 // tested
+          print(f"Mutation score on changed code: {score}% (killed+timeout={s['killed'] + s['timeout']} / mutants={tested}; survived={s['survived']}, suspicious={s['suspicious']})")
           if score < 60:
               print("::error::Mutation score below 60% - tests are too weak")
               sys.exit(1)
