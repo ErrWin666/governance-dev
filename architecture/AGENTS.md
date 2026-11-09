@@ -13,6 +13,7 @@ everything — read only what your task requires.
 | How does security/logging work? | 08-crosscutting.md |
 | What does term X mean? | 12-glossary.md |
 | Why was decision Y made? | adr/ — see ADR index below |
+| Where is the project spec / task list / resume state? | plan/ (L3 — spec.md, tasks.md, approved hashes; P12 gates src/) |
 
 ## ADR index (decisions, not documentation)
 
