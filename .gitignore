@@ -5,3 +5,4 @@ backups/
 .gate-env.*.json
 test.env
 ci-test/
+trash/

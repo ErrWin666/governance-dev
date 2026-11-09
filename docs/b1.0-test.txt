@@ -1,2 +1,0 @@
-b1.0 seed line
-appended by b1.0 coverage test

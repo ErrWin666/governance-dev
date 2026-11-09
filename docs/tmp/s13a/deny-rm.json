@@ -1,7 +1,0 @@
-{
-  "version": 1,
-  "permissions": {
-    "allow": ["exec", "read", "edit", "write", "grep", "glob"],
-    "deny": ["Exec(rm)"]
-  }
-}

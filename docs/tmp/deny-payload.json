@@ -1,1 +1,0 @@
-{"hook_event_name":"PreToolUse","tool_name":"exec","tool_input":{"command":"wsl -u root id"},"tool_use_id":"exec:97#wsldeny","session_id":"victorious-colby","prompt_id":"wsl-deny-test"}
