@@ -221,7 +221,7 @@ jobs:
           print("mutmut only_mutate:", src_files)
           PY
           mutmut run || exit 1
-          mutmut results --all > "$TMPD/qg_mutres.txt" || true
+          mutmut results --all true > "$TMPD/qg_mutres.txt" || true
           python3 - <<'PY'
           import os, re, sys
           tmp = os.environ.get('RUNNER_TEMP') or os.sep + 'tmp'
