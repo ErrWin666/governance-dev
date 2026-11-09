@@ -1,5 +1,5 @@
 # GOVERNANCE_SPEC.md
-# Governance Specification — Version 2.1
+# Governance Specification — Version 2.2
 # Created: [date] — bumped to v2.0 on 2026-11-09 (moved to repo root + documented corrections below)
 # Owner: [your name]
 # Status: Owner-approved — the fixed reference for every session
@@ -17,6 +17,11 @@
 #    module; mandatory structured logging; Editor / Independent-Writer
 #    role split; formal Output Rules category; Phase-0 engineering-choice
 #    justification (choice + alternative + rejection reason).
+# 5) v2.1 → v2.2 (2026-11-09): five owner additions — no phase-jumping
+#    during creation/build (rule 24); resumable checkpoints for owner and
+#    agents (rule 25); owner-ergonomics principle 7; logic-flow
+#    verification (rule 26); test files obey the same constraints as
+#    source code (rule 27) — A1's test exemption removed accordingly.
 
 ---
 
@@ -34,6 +39,7 @@ delivery speed.
 4. **No silent work**: every step leaves a trace; every failure is visible.
 5. **Simplicity first**: the least complexity that serves the purpose; the fewest roles that cover the functions.
 6. **Proportional simplicity**: governance scales to the project's size and risk. A mechanism runs only when its benefit outweighs its cost.
+7. **Owner ergonomics**: governance exists to reduce the owner's burden, not to create it — minimal questions, minimal technical noise; choices arrive decision-ready, not as interrogations.
 
 ---
 
@@ -100,6 +106,7 @@ before passing the previous phase's gate.
 - **Forbidden** exceeding 400 lines/file, 300 lines/class, or 40 lines/function (detected by CI script).
 - **Forbidden** tunable values buried in code — every configurable value lives in the central configuration module (one file, documented: what each value means and where it is used).
 - **Forbidden** scattered `print`/`console.log` — logging goes through the project's logging system only.
+- **Forbidden** test files that violate the same limits as source code (size, structure, quality) — tests are code.
 - **Forbidden** "working" code without a test (0% coverage = failure).
 - **Forbidden** fixing broken code by editing the test (detected by hash).
 
@@ -300,6 +307,10 @@ These rules are **non-negotiable**. Any violation = phase failure.
 | ~~21~~ | ~~Mandatory single runtime (Single-Environment Mandate)~~ — **RETIRED** | Required Git Bash only; retired because Git Bash proved unreliable (cygheap fork failures, ERR-007) and the runtime of record became WSL (ADR-001). Its spirit survives: policies like `wsl -u root` (P1) remain in force |
 | 22 | Every tunable value lives in a central configuration module | One file holds all configurable values, each documented (meaning + where used); a value buried in code is a violation regardless of function |
 | 23 | Structured logging only | A defined logging system for every significant event; scattered `print`/`console.log`/`debugger` in shipped code = failure |
+| 24 | No phase-jumping during creation and building | Phases run in order; a phase starts only when the previous phase's gate evidence exists — skipping ahead is a violation even with good intent |
+| 25 | Every pause point is resumable | Leaving a project for days must not lose the thread: status, what is done, what is next, and key pause points written in plain language so the owner and any agent resume cold without the conversation |
+| 26 | Logic is verified, not just behavior | Control flow, dead branches, and spec-vs-implementation consistency are checked — "it runs" is not proof the logic is right |
+| 27 | Test files obey the same constraints as source code | Size limits, structure, naming, and quality rules apply to tests — a 1000-line test file is a violation, not an exception |
 
 **Rule categories** (owner definition, v2.1): **Hard Rules** block the work
 when violated (rules 1–23 above). **Role Rules** bind one role only (e.g.,

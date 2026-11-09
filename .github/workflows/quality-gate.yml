@@ -107,8 +107,8 @@ jobs:
               if ext not in SRC_EXT:
                   continue
               n = sum(1 for _ in open(path, encoding='utf-8', errors='replace'))
-              if not is_test and n > MAX_FILE:
-                  err(path, MAX_FILE + 1, f"source file has {n} lines (max {MAX_FILE})")
+              if n > MAX_FILE:
+                  err(path, MAX_FILE + 1, f"{'test ' if is_test else ''}source file has {n} lines (max {MAX_FILE}; spec v2.2 rule 27 — tests are code)")
               if ext == '.py':
                   check_py_funcs(path)
               elif ext in BRACE_EXT:
