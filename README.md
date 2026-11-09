@@ -20,8 +20,8 @@ Details: [STATE.md](STATE.md).
 1. Read STATE.md §1 (what works) and §5 (next steps) — 2 minutes
 2. If a governance file needs editing, read STATE.md §7 (recovery) first
 3. For architecture questions, start at
-   [architecture/AGENTS.md](architecture/AGENTS.md)
-4. For "why was X done?", read [architecture/adr/](architecture/adr/)
+   [docs/architecture/AGENTS.md](docs/architecture/AGENTS.md)
+4. For "why was X done?", read [docs/architecture/adr/](docs/architecture/adr/)
 
 ## What this protects against
 
@@ -49,36 +49,40 @@ Details: [STATE.md](STATE.md).
     ├── README.md                     ← this file
     ├── STATE.md                      ← current status (read §1, §5, §7)
     ├── approvals/approval.md         ← owner decisions (A-001, A-002...)
-    ├── architecture/                 ← C4 + ADRs (start at AGENTS.md)
-    ├── ci-test/                      ← working copy of the CI testbed repo
     ├── docs/
+    │   ├── architecture/             ← arc42 + ADRs (start at AGENTS.md)
     │   ├── errors/                   ← ERR index (lessons learned)
+    │   ├── research/                 ← landscape & prior-art notes
     │   ├── specs/GOVERNANCE_SPEC.md      ← the constitution (v1.1)
     │   ├── plans/GOVERNANCE_BUILD_PLAN.md ← build plan
     │   └── governance-file-recovery.md
     ├── logs/gate.log                 ← audit trail (+ b1.0 test logs)
+    ├── plan/                         ← L3 workspace (spec/tasks, pgen pilot)
     ├── policies/                     ← OPA gate + P1–P5 (.rego)
     │   ├── gate.sh
     │   ├── main.rego
     │   ├── p1..p5_*.rego
     │   └── .governance/tool-inventory.txt
-    ├── scripts/apply-governance-acl.ps1
-    ├── backups/                      ← pre-ACL snapshot
-    └── old-version/, مشروع اختبار/   ← earlier Arabic project
-                                        (holds ERR-001..003)
+    └── scripts/apply-governance-acl.ps1
+
+Archived outside the tree (recoverable, not deleted):
+C:/governance-dev-archive/ — old-version/, trash/, backups/,
+مشروع اختبار/ (earlier Arabic project, holds ERR-001..003),
+ci-test/ (local clone of the CI testbed repo; re-clone from
+github.com/ErrWin666/ci-test if needed).
 
 ## Key concepts
 
 19 terms defined in
-[architecture/12-glossary.md](architecture/12-glossary.md).
+[docs/architecture/12-glossary.md](docs/architecture/12-glossary.md).
 
 ## How to read the docs (proportional reading)
 
 Do NOT read everything. Use this order:
 
-- **First visit:** this README (5 min) → architecture/AGENTS.md (2 min)
+- **First visit:** this README (5 min) → docs/architecture/AGENTS.md (2 min)
 - **Resuming after a break:** STATE.md §1, §5, §7 (5 min)
-- **Before a governance change:** architecture/adr/ (10 min)
+- **Before a governance change:** docs/architecture/adr/ (10 min)
 - **Debugging / "why is X like this?":**
   [docs/errors/README.md](docs/errors/README.md) (5 min)
 

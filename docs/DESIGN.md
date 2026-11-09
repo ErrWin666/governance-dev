@@ -38,7 +38,7 @@ governance-dev/
 ├── docs/                        # reference + explanation
 │   ├── specs/ plans/ errors/    # GOVERNANCE_SPEC, BUILD_PLAN, ERR-001..014
 │   └── ROADMAP.md REASSESSMENT.md DESIGN.md
-├── architecture/                # arc42-lite + ADRs + AGENTS.md router
+├── docs/architecture/           # arc42-lite + ADRs + AGENTS.md router
 ├── deploy/                      # PROPOSED (L6)
 │   ├── profiles/{small,medium,erp}.yaml
 │   └── (copier template root = repo root)
