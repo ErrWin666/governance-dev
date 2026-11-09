@@ -11,6 +11,8 @@
 | GAP-L1-02 | `devin -p --config` dormant bypass — blocked only by CLI auth wall | One auth state flips a full bypass (ERR-009) | Detection only | YES — accept risk or restrict CLI auth |
 | GAP-L1-03 | `permissions.deny` is dead code | Anyone relying on it has no protection (ERR-008) | Never rely on it — documented | no |
 | GAP-L1-04 | Local exec of destructive commands — detectable not preventable | Fail-open seam in the Devin hook contract | Audit log review; Managed Devins at L5 | YES — accept or isolate work |
+| GAP-L1-11 | `notebook_edit` missing from P4 + P8 tool matchers (present in P12/P4c) — .ipynb writes bypass evidence + sensitive-file rules | one-line matcher additions | none | no |
+| GAP-L1-12 | P10 exfil doesn't inspect `exec` — outbound via curl/wget/scp/nc uninspected | extend P10 tool list | P3 catches literal secrets in command text | YES — same decision as L1-10 |
 | GAP-L1-10 | **exec bypasses ALL path/write policies**: P4/P8/P12/P4c match only {write,edit,notebook_edit} — proven live (`echo > policies/.governance/probe.txt` passed the gate). P10 exfil doesn't inspect exec either. Detection-only via PostToolUse (sanctioned by A-002 cl.18) but self-protection is also bypassed — scope understated in L1-04 | The gate can't parse shell intent; `>`/`sed -i`/`cp`/`git checkout` write ungated | Options: (a) exec command inspection for write patterns (heuristic, evadable), (b) integrity-hash verify policies/specs/tests at gate time (detection), (c) exec deny-list at Devin permissions layer | YES — pick mitigation depth |
 | GAP-L1-05 | WSL/cygheap/hook crash → fail_closed locks the owner out | Proven live today: hook crash (`-1073741502`) blocked a plain `read` | Manual recovery (STATE.md §7) | YES — accept fragility or invest in watchdog |
 | ~~GAP-L1-06~~ ✅ CLOSED | gate.sh P12 env wiring + p4 `lower()` fix — committed 82874be | — | — | — |
@@ -34,6 +36,7 @@
 | GAP-L2-10 | A3 scans whole changed file, not just the diff | Pre-existing violations fail the PR — intentional but noisy | fail-closed by design | no |
 | GAP-L2-11 | L2c skills are advisory-only; nothing tracks whether findings are acted on | Advisory findings can be silently ignored | by design | YES — keep advisory or gate on findings |
 | GAP-L2-12 | Class-size check unimplemented — spec v2.1 sets class ≤300 but A1 only counts files + functions | A 300+ line class in a ≤400-line file passes the gate | file cap catches worst case | no |
+| GAP-L2-13 | `importlinter.ini` deleted in PR #4 (placeholder named `risky_pkg`, never existed) — B1/D2 Python dependency-contract coverage is now ZERO until a real contract exists | rule 28 has no Python enforcement | needs a real package to contract on | YES — author contract when package exists |
 
 ## L3 — Planning
 
@@ -80,7 +83,8 @@
 | ~~GAP-X-02~~ ✅ CLOSED | tree committed; only owner-file `current_phase` remains untracked | — | — | — |
 | GAP-X-03 | approval.md holds only A-002; README references A-001 that does not exist; approvals are interim text (ERR-001 mechanism) | Approval record is thinner than the docs imply | keep A-XXX discipline | no |
 | GAP-X-04 | No runbook/how-to docs (Diátaxis gap, REASSESSMENT §3) | Ops knowledge lives in STATE.md §7 only | none | no |
-| GAP-X-05 | No guard against agent overclaiming / phase-jumping | The exact failure mode that triggered this audit | `workflow-guard` skill + WORKFLOW_GUARD.md created today | no — created this session |
+| GAP-X-05 | No guard against agent overclaiming / phase-jumping | The exact failure mode that triggered this audit | `workflow-guard` skill + WORKFLOW_GUARD.md created today — ADVISORY only, self-invoked; nothing forces it | no — created this session |
+| GAP-X-06 | Spec mechanisms never built: M1 phase-contracts (+`size:` field), M7 CI ERR→test check, M9 `knowledge/`, rules 10/29/30 (coordination-log, review-cycle tracking) | Rules exist on paper with zero machinery | conventions cover intent partially | YES — schedule vs defer |
 
 ## Self-review (L0)
 

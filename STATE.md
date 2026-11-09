@@ -41,9 +41,9 @@
   (fail-open seam in Devin hook contract)
 - WSL cold start / crash — fail_closed blocks but locks owner out
   (recovery = manual)
-- WSL `/usr/local/bin/opa` is a corrupt download (HTML 504 page, not a
-  binary) — `gate.sh` invokes `opa` from PATH → local gate degraded.
-  Reinstall required (ERR-017 session discovery)
+- WSL `/usr/local/bin/opa` is a corrupt download (HTML 504 page) — inert:
+  `gate.sh` prepends `~/.local/bin` which holds a working 64MB binary.
+  Gate verified live (denied a --force probe). Cosmetic debris only.
 
 ## 3. Verified facts
 - Hook contract: exit 0=allow, 2=block, others=logged-not-blocking
