@@ -1,0 +1,241 @@
+name: quality-gate-deep
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: quality-gate-deep-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  quality-gate-deep:
+    name: quality-gate-deep
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      BASE_SHA: ${{ github.event.pull_request.base.sha }}
+      PYTHONUTF8: "1"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Risk assessment - is this a risky PR?
+        id: risk
+        run: |
+          TMPD="${RUNNER_TEMP:-/tmp}"
+          git diff --name-only --diff-filter=ACMR "${BASE_SHA}...HEAD" | sort -u > "$TMPD/dg_changed.txt"
+          git diff --numstat "${BASE_SHA}...HEAD" | awk '{a+=$1; d+=$2} END {print a+d}' > "$TMPD/dg_lines.txt"
+          LINES=$(cat "$TMPD/dg_lines.txt")
+          PROTECTED=$(grep -cE '^(policies/|\.github/|auth/|payments/)' "$TMPD/dg_changed.txt" || true)
+          grep -E '\.py$' "$TMPD/dg_changed.txt" | grep -vEi '(^|/)(tests?|__tests__|testdata)(/|$)|(^|/)test_|_test\.py$|conftest\.py$' > "$TMPD/dg_py_src.txt" || true
+          grep -E '\.(js|jsx|ts|tsx|mjs|cjs)$' "$TMPD/dg_changed.txt" | grep -vEi '(test|spec|__tests__)' > "$TMPD/dg_js_src.txt" || true
+          echo "Changed lines: $LINES, protected-path files: $PROTECTED"
+          if [ "${LINES:-0}" -gt 200 ] || [ "${PROTECTED:-0}" -gt 0 ]; then
+            echo "risky=true" >> "$GITHUB_OUTPUT"
+            echo "RISKY PR - running Layer B deep checks"
+          else
+            echo "risky=false" >> "$GITHUB_OUTPUT"
+            echo "Small/safe PR - Layer A only. Deep checks skipped."
+          fi
+
+      - name: B1 - Dependency architecture
+        id: b1
+        if: always() && steps.risk.outputs.risky == 'true'
+        run: |
+          TMPD="${RUNNER_TEMP:-/tmp}"
+          PY_SRC=$(cat "$TMPD/dg_py_src.txt")
+          JS_SRC=$(cat "$TMPD/dg_js_src.txt")
+          failed=0
+          if [ -n "$PY_SRC" ] && [ -f importlinter.ini ]; then
+            python3 -m pip install --quiet 'import-linter==2.16'
+            echo "--- import-linter contracts"
+            lint-imports --config importlinter.ini || failed=1
+          elif [ -n "$PY_SRC" ]; then
+            echo "::notice::Python files changed but no importlinter.ini - skipping Py dependency contracts"
+          fi
+          if [ -n "$JS_SRC" ] && [ -f .dependency-cruiser.js ]; then
+            echo "--- dependency-cruiser"
+            npx --yes dependency-cruiser@16 --config .dependency-cruiser.js --no-progress $JS_SRC || failed=1
+          elif [ -n "$JS_SRC" ]; then
+            echo "::notice::JS/TS files changed but no .dependency-cruiser.js - skipping JS dependency check"
+          fi
+          [ "$failed" -eq 0 ] && echo "B1 passed" || exit 1
+
+      - name: B2 - Cognitive complexity (radon / pyscn)
+        id: b2
+        if: always() && steps.risk.outputs.risky == 'true'
+        run: |
+          TMPD="${RUNNER_TEMP:-/tmp}"
+          PY_SRC=$(cat "$TMPD/dg_py_src.txt")
+          if [ -z "$PY_SRC" ]; then
+            echo "No Python source changed - skipping B2 (arborist-metrics does not exist; radon is the Py fallback, eslint-sonarjs covers JS in D1)."
+            exit 0
+          fi
+          python3 -m pip install --quiet 'radon==6.0.1'
+          failed=0
+          for f in $PY_SRC; do
+            radon cc -s -j "$f" > "$TMPD/radon.json" 2>/dev/null || continue
+            python3 - "$f" "$TMPD/radon.json" <<'PY'
+          import json, sys
+          f, p = sys.argv[1], sys.argv[2]
+          data = json.load(open(p, encoding='utf-8'))
+          for item in data.get(f, []):
+              if item.get('complexity', 0) > 15:
+                  print(f"::error file={f}::{item['type']} '{item['name']}' cyclomatic complexity {item['complexity']} (max 15)")
+                  sys.exit(1)
+          PY
+            [ $? -ne 0 ] && failed=1
+          done
+          [ "$failed" -eq 0 ] && echo "B2 passed: complexity <=15" || exit 1
+
+      - name: B3 - Coupling and cohesion (polyscan)
+        id: b3
+        if: always() && steps.risk.outputs.risky == 'true'
+        run: |
+          TMPD="${RUNNER_TEMP:-/tmp}"
+          JS_SRC=$(cat "$TMPD/dg_js_src.txt")
+          if [ -z "$JS_SRC" ]; then
+            echo "No JS/TS source changed - polyscan covers JS/Go/Rust/C++ only (Python coupling needs per-language adapters, L2d). Skipping B3."
+            exit 0
+          fi
+          npx --yes polyscan@0.6.1 check $JS_SRC || exit 1
+
+      - name: B4 - CFG dead code (pyscn)
+        id: b4
+        if: always() && steps.risk.outputs.risky == 'true'
+        run: |
+          TMPD="${RUNNER_TEMP:-/tmp}"
+          PY_SRC=$(cat "$TMPD/dg_py_src.txt")
+          if [ -z "$PY_SRC" ]; then
+            echo "No Python source changed - skipping B4"
+            exit 0
+          fi
+          python3 -m pip install --quiet 'pyscn==1.33.2'
+          failed=0
+          for f in $PY_SRC; do
+            pyscn check "$f" || failed=1
+          done
+          [ "$failed" -eq 0 ] && echo "B4 passed: no dead code / unreachable branches" || exit 1
+
+      - name: B5 - Mutation testing, module scope (mutmut)
+        id: b5
+        if: always() && steps.risk.outputs.risky == 'true'
+        run: |
+          TMPD="${RUNNER_TEMP:-/tmp}"
+          PY_SRC=$(cat "$TMPD/dg_py_src.txt")
+          if [ -z "$PY_SRC" ]; then
+            echo "No Python source changed - skipping B5"
+            exit 0
+          fi
+          if ! git ls-files | grep -qE '(^|/)test_.*\.py$|_test\.py$'; then
+            echo "::notice::Changed Python source found but no Python test files exist - mutation score cannot be computed. Skipping B5."
+            exit 0
+          fi
+          python3 -m pip install --quiet 'mutmut==3.8.1' pytest
+          python3 - <<'PY'
+          import configparser, os
+          tmp = os.environ.get('RUNNER_TEMP') or os.sep + 'tmp'
+          src_files = [l.strip() for l in open(os.path.join(tmp, 'dg_py_src.txt')) if l.strip()]
+          dirs = []
+          for f in src_files:
+              d = os.path.dirname(f)
+              dirs.append(d if d else f)
+          dirs = sorted(set(dirs))
+          cfg = configparser.ConfigParser()
+          cfg.read('setup.cfg')
+          if not cfg.has_section('mutmut'):
+              cfg.add_section('mutmut')
+          cfg.set('mutmut', 'source_paths', '\n' + '\n'.join(dirs))
+          with open('setup.cfg', 'w') as fh:
+              cfg.write(fh)
+          print("mutmut source_paths (module scope):", dirs)
+          PY
+          mutmut run | tee "$TMPD/dg_mutrun.txt" || exit 1
+          mutmut export-cicd-stats || exit 1
+          python3 - "$TMPD" <<'PY'
+          import json, os, re, sys
+          s = json.load(open('mutants/mutmut-cicd-stats.json', encoding='utf-8'))
+          print("mutmut cicd stats:", s)
+          generated = 0
+          for m in re.finditer(r'(\d+)/(\d+)', open(os.path.join(sys.argv[1], 'dg_mutrun.txt'), encoding='utf-8', errors='replace').read()):
+              generated = max(generated, int(m.group(2)))
+          tested = max(s['total'] - s['skipped'], generated - s['skipped'])
+          if tested <= 0:
+              print("::notice::No mutants produced - passing.")
+              sys.exit(0)
+          score = (s['killed'] + s['timeout']) * 100 // tested
+          print(f"Module-scope mutation score: {score}% ({s['killed'] + s['timeout']}/{tested})")
+          if score < 60:
+              print("::error::Mutation score below 60% on touched modules")
+              sys.exit(1)
+          PY
+
+      - name: B6 - API contract, strict mode
+        id: b6
+        if: always() && steps.risk.outputs.risky == 'true'
+        run: |
+          TMPD="${RUNNER_TEMP:-/tmp}"
+          specs=$(grep -Ei '(openapi|swagger)\.(json|ya?ml)$' "$TMPD/dg_changed.txt" || true)
+          if [ -z "$specs" ]; then
+            echo "No OpenAPI/Swagger spec changed - skipping B6."
+            exit 0
+          fi
+          python3 -m pip install --quiet 'api-contract-guard==0.2.0' pyyaml
+          failed=0
+          while IFS= read -r spec; do
+            [ -f "$spec" ] || continue
+            if ! git show "${BASE_SHA}:${spec}" > "$TMPD/dg_base_spec" 2>/dev/null; then
+              echo "::notice::$spec is new - no base contract."
+              continue
+            fi
+            python3 - "$spec" "$TMPD" <<'PY'
+          import json, os, sys, yaml
+          def load(p):
+              txt = open(p, encoding='utf-8', errors='replace').read()
+              try:
+                  return json.loads(txt)
+              except json.JSONDecodeError:
+                  return yaml.safe_load(txt)
+          tmpd = sys.argv[2]
+          json.dump(load(os.path.join(tmpd, 'dg_base_spec')), open(os.path.join(tmpd, 'dg_base.json'), 'w'))
+          json.dump(load(sys.argv[1]), open(os.path.join(tmpd, 'dg_head.json'), 'w'))
+          PY
+            api-contract-guard "$TMPD/dg_base.json" "$TMPD/dg_head.json" --mode openapi --fail-on-breaking --strict-additions || failed=1
+          done <<< "$specs"
+          [ "$failed" -eq 0 ] && echo "B6 passed: zero API changes in risky PR" || exit 1
+
+      - name: Gate summary
+        if: always() && steps.risk.outputs.risky == 'true'
+        env:
+          B1: ${{ steps.b1.outcome }}
+          B2: ${{ steps.b2.outcome }}
+          B3: ${{ steps.b3.outcome }}
+          B4: ${{ steps.b4.outcome }}
+          B5: ${{ steps.b5.outcome }}
+          B6: ${{ steps.b6.outcome }}
+        run: |
+          failed=0
+          for pair in B1:dep-arch B2:complexity B3:coupling-cohesion B4:dead-code B5:mutation B6:api-contract-strict; do
+            id="${pair%%:*}"; label="${pair#*:}"
+            eval "res=\$$id"
+            printf '  %-3s %-20s %s\n' "$id" "$label" "${res:-skipped}"
+            [ "$res" = "failure" ] && failed=1
+          done
+          if [ "$failed" -ne 0 ]; then
+            echo "::error::quality-gate-deep FAILED - see check output above"
+            exit 1
+          fi
+          echo "quality-gate-deep PASSED"

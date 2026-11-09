@@ -1,0 +1,161 @@
+name: quality-gate-perlang
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: quality-gate-perlang-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  quality-gate-perlang:
+    name: quality-gate-perlang
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      BASE_SHA: ${{ github.event.pull_request.base.sha }}
+      PYTHONUTF8: "1"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.23"
+          cache: false
+
+      - name: D4 - Detect languages in diff
+        id: detect
+        run: |
+          TMPD="${RUNNER_TEMP:-/tmp}"
+          git diff --name-only --diff-filter=ACMR "${BASE_SHA}...HEAD" | sort -u > "$TMPD/pl_changed.txt"
+          py=$(grep -cE '\.py$' "$TMPD/pl_changed.txt" || true)
+          js=$(grep -cE '\.(js|jsx|ts|tsx|mjs|cjs)$' "$TMPD/pl_changed.txt" || true)
+          go=$(grep -cE '\.go$' "$TMPD/pl_changed.txt" || true)
+          echo "py=$py js=$js go=$go"
+          echo "py=$py" >> "$GITHUB_OUTPUT"
+          echo "js=$js" >> "$GITHUB_OUTPUT"
+          echo "go=$go" >> "$GITHUB_OUTPUT"
+          grep -E '\.py$' "$TMPD/pl_changed.txt" | grep -vEi '(^|/)(tests?|__tests__|testdata)(/|$)|(^|/)test_|_test\.py$|conftest\.py$' > "$TMPD/pl_py_src.txt" || true
+          grep -E '\.go$' "$TMPD/pl_changed.txt" | grep -v '_test\.go$' > "$TMPD/pl_go_src.txt" || true
+          known=$((py + js + go))
+          total=$(wc -l < "$TMPD/pl_changed.txt")
+          [ "$known" -eq 0 ] && [ "$total" -gt 0 ] && echo "::warning::No recognized source language in diff - per-language adapters skipped"
+
+      - name: D2 - Python adapter (ruff + radon + import-linter + coverage)
+        id: d2
+        if: always() && steps.detect.outputs.py != '0'
+        run: |
+          TMPD="${RUNNER_TEMP:-/tmp}"
+          PY_SRC=$(cat "$TMPD/pl_py_src.txt")
+          failed=0
+          python3 -m pip install --quiet ruff 'radon==6.0.1'
+          echo "--- ruff"
+          [ -n "$PY_SRC" ] && ruff check $PY_SRC || echo "only test/config py files changed"
+          for f in $PY_SRC; do
+            radon cc -s -j "$f" > "$TMPD/radon.json" 2>/dev/null || continue
+            python3 - "$f" "$TMPD/radon.json" <<'PY'
+          import json, sys
+          f, p = sys.argv[1], sys.argv[2]
+          for item in json.load(open(p, encoding='utf-8')).get(f, []):
+              if item.get('complexity', 0) > 10:
+                  print(f"::error file={f}::{item['type']} '{item['name']}' cyclomatic complexity {item['complexity']} (max 10)")
+                  sys.exit(1)
+          PY
+            [ $? -ne 0 ] && failed=1
+          done
+          if [ -f importlinter.ini ] && [ -n "$PY_SRC" ]; then
+            python3 -m pip install --quiet 'import-linter==2.16'
+            lint-imports --config importlinter.ini || failed=1
+          fi
+          if git ls-files | grep -qE '(^|/)test_.*\.py$|_test\.py$'; then
+            python3 -m pip install --quiet pytest pytest-cov
+            python3 -m pytest --ignore=mutants --cov=. --cov-fail-under=80 -q || failed=1
+          else
+            echo "::notice::no python test suite - coverage gate skipped"
+          fi
+          [ "$failed" -eq 0 ] && echo "D2 passed" || exit 1
+
+      - name: D1 - JS/TS adapter (eslint + sonarjs + knip + depcruise + nyc)
+        id: d1
+        if: always() && steps.detect.outputs.js != '0'
+        run: |
+          if [ ! -f package.json ]; then
+            echo "::notice::JS/TS files changed but no package.json - JS toolchain cannot run (repo is not a node project). Skipping D1."
+            exit 0
+          fi
+          failed=0
+          npm ci --ignore-scripts --no-audit --no-fund || exit 1
+          if grep -q '"eslint"' package.json; then
+            npx eslint . || failed=1
+          else
+            echo "::notice::no eslint config - lint skipped"
+          fi
+          if grep -q '"eslint-plugin-sonarjs"' package.json || [ -d node_modules/eslint-plugin-sonarjs ]; then
+            npx eslint --no-eslintrc --plugin sonarjs --rule '{"sonarjs/cognitive-complexity": ["error", 15]}' --ext .js,.jsx,.ts,.tsx . || failed=1
+          fi
+          if grep -q '"knip"' package.json; then
+            npx knip || failed=1
+          fi
+          if [ -f .dependency-cruiser.js ]; then
+            js_targets=$(git ls-files '*.js' '*.jsx' '*.ts' '*.tsx' | grep -v node_modules | head -200)
+            [ -n "$js_targets" ] && npx --yes dependency-cruiser@16 --config .dependency-cruiser.js --no-progress $js_targets || failed=1
+          fi
+          if grep -q '"nyc"' package.json; then
+            npx nyc --check-coverage --lines 80 npm test || failed=1
+          fi
+          [ "$failed" -eq 0 ] && echo "D1 passed" || exit 1
+
+      - name: D3 - Go adapter (vet + gocyclo + gocognit + cover)
+        id: d3
+        if: always() && steps.detect.outputs.go != '0'
+        run: |
+          TMPD="${RUNNER_TEMP:-/tmp}"
+          if [ ! -f go.mod ]; then
+            echo "::notice::Go files changed but no go.mod - skipping D3."
+            exit 0
+          fi
+          GO_SRC=$(cat "$TMPD/pl_go_src.txt")
+          failed=0
+          go vet ./... || failed=1
+          go install github.com/fzipp/gocyclo/cmd/gocyclo@latest
+          go install github.com/uudashr/gocognit/cmd/gocognit@latest
+          for f in $GO_SRC; do
+            out=$(gocyclo -over 10 "$f"); [ -n "$out" ] && { echo "::error file=$f::cyclomatic complexity >10"; echo "$out"; failed=1; }
+            out=$(gocognit -over 15 "$f"); [ -n "$out" ] && { echo "::error file=$f::cognitive complexity >15"; echo "$out"; failed=1; }
+          done
+          go test -coverprofile="$TMPD/cover.out" ./... || failed=1
+          [ "$failed" -eq 0 ] && echo "D3 passed" || exit 1
+
+      - name: Gate summary
+        if: always()
+        env:
+          D1: ${{ steps.d1.outcome }}
+          D2: ${{ steps.d2.outcome }}
+          D3: ${{ steps.d3.outcome }}
+        run: |
+          failed=0
+          for pair in D1:js-ts D2:python D3:go; do
+            id="${pair%%:*}"; label="${pair#*:}"
+            eval "res=\$$id"
+            printf '  %-3s %-10s %s\n' "$id" "$label" "${res:-skipped}"
+            [ "$res" = "failure" ] && failed=1
+          done
+          if [ "$failed" -ne 0 ]; then
+            echo "::error::quality-gate-perlang FAILED"
+            exit 1
+          fi
+          echo "quality-gate-perlang PASSED"

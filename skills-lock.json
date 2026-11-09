@@ -1,0 +1,35 @@
+{
+  "version": 1,
+  "skills": {
+    "adversarial-reviewer": {
+      "source": "alirezarezvani/claude-skills",
+      "sourceType": "github",
+      "skillPath": "engineering-team/skills/adversarial-reviewer/SKILL.md",
+      "computedHash": "5e95238ecf2a263b7e7a696e0754a5113aa9f9fdc01ab926557ba8298d1f1d00"
+    },
+    "clean-code": {
+      "source": "sickn33/agentic-awesome-skills",
+      "sourceType": "github",
+      "skillPath": "skills/clean-code/SKILL.md",
+      "computedHash": "b504c2cfcb2cb640e6cf8b582972389dcc3e62cee44a105e85391e942f20f9f1"
+    },
+    "code-review": {
+      "source": "mattpocock/skills",
+      "sourceType": "github",
+      "skillPath": "skills/engineering/code-review/SKILL.md",
+      "computedHash": "c2e0695f4d6bb9e1cc0b4c68d9965d062271cff387000fa59c1c2d31a18c25b8"
+    },
+    "mutation-testing": {
+      "source": "secondsky/claude-skills",
+      "sourceType": "github",
+      "skillPath": "plugins/mutation-testing/skills/mutation-testing/SKILL.md",
+      "computedHash": "3397f4ec4738e3e34bf423ed11e31efc0ae75a1bbb9155086170607a32312dc8"
+    },
+    "quality-gate": {
+      "source": "simota/quality-skills",
+      "sourceType": "github",
+      "skillPath": "skills/quality-gate/SKILL.md",
+      "computedHash": "a87af2279df1829a11299269d188cb9f01921722898dfae1ebaae0147ded45a4"
+    }
+  }
+}
