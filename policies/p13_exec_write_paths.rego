@@ -10,7 +10,7 @@ import rego.v1
 # word operators: target path appears anywhere in the following segment
 deny contains msg if {
 	input.tool_name == "exec"
-	c := lower(replace(input.tool_input.command, "\\", "/"))
+	c := concat("", [" ", lower(replace(input.tool_input.command, "\\", "/"))])
 	some seg in segments_after_op(c)
 	seg_contains_protected(seg)
 	msg := sprintf("P13-EXEC-WRITE: exec write aimed at protected path: %s", [input.tool_input.command])
@@ -29,13 +29,15 @@ deny contains msg if {
 segments_after_op(c) := [trim_space(p) |
 	some op in {" cp ", " mv ", " tee ", "sed -i", "sed --in-place", " install ", " dd ", " truncate ", " touch ", " rm ", " patch ", " nano ", " vim ", " code ", "git checkout", "git restore", "git apply", "git clean"}
 	parts := split(c, op)
-	some i in numbers.range(1, count(parts) - 1)
+	some i in numbers.range(0, count(parts) - 1)
+	i > 0
 	p := parts[i]
 ]
 
 segments_after_redirect(c) := [trim_space(p) |
 	parts := split(c, ">")
-	some i in numbers.range(1, count(parts) - 1)
+	some i in numbers.range(0, count(parts) - 1)
+	i > 0
 	p := parts[i]
 ]
 
