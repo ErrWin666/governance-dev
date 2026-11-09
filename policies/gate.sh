@@ -1,12 +1,5 @@
 #!/usr/bin/env bash
 # WHY: single fail-closed entrypoint for the PreToolUse gate (M5, R1).
-# stdin  = Devin hook payload JSON (tool_name, tool_input, ...)
-# stdout = unused; stderr = block reason on deny.
-# exit 0 allow / exit 2 deny / exit 2 GOV_GATE_DOWN on any error (fail closed).
-# Ungoverned workspaces (no ./policies/main.rego) pass through — this hook lives
-# in the GLOBAL user config and must not gate unrelated projects.
-# Plan B port: targets WSL (native fork). Also runs under Git Bash so the
-# transition session keeps working; opa is at ~/.local/bin (no sudo available).
 set -u
 
 export PATH="$HOME/.local/bin:$PATH"
@@ -18,7 +11,6 @@ PAYLOAD="$(cat)"
 printf '%s\n\n' "$PAYLOAD" >> logs/b1.0-pretool.log
 GATE=logs/gate.log
 
-# TEMP (Fix-2 cwd proof): remove after fresh session shows /mnt/c/governance-dev.
 printf '%s PWD-PROOF cwd=%s\n' "$(date -Is)" "$(pwd)" >> "$GATE"
 
 command -v opa >/dev/null 2>&1 || {
@@ -27,7 +19,6 @@ command -v opa >/dev/null 2>&1 || {
 	exit 2
 }
 
-# Runtime-read env data: tool inventory + freeze state + evidence presence.
 INV=$(grep -v '^[[:space:]]*#' policies/.governance/tool-inventory.txt | sed '/^[[:space:]]*$/d' | jq -R . | jq -sc .)
 FT='[]'; TL=false
 if [ -f tests.lock ]; then TL=true; FT=$(awk '{print $NF}' tests.lock | jq -R . | jq -sc .); fi
@@ -35,13 +26,31 @@ EVP=false; MAN=$(ls evidence/*/manifest.json 2>/dev/null | jq -R . | jq -sc .); 
 [ "$MAN" != '[]' ] && EVP=true
 CUR=$(head -1 policies/.governance/current_phase 2>/dev/null | tr -d ' \r\n')
 CURJ=null; [ -n "$CUR" ] && CURJ="\"$CUR\""
+
+# L3: verify approved plan files with hash match
+PLAN_SPEC_APPROVED=false
+if [ -f plan/spec.approved ] && [ -f plan/spec.md ]; then
+    EXPECTED=$(tr -d ' \r\n' < plan/spec.approved | tr 'A-F' 'a-f')
+    ACTUAL=$(sha256sum plan/spec.md 2>/dev/null | awk '{print $1}')
+    if [ -n "$EXPECTED" ] && [ "$EXPECTED" = "$ACTUAL" ]; then
+        PLAN_SPEC_APPROVED=true
+    fi
+fi
+
+PLAN_TASKS_APPROVED=false
+if [ -f plan/tasks.approved ] && [ -f plan/tasks.md ]; then
+    EXPECTED=$(tr -d ' \r\n' < plan/tasks.approved | tr 'A-F' 'a-f')
+    ACTUAL=$(sha256sum plan/tasks.md 2>/dev/null | awk '{print $1}')
+    if [ -n "$EXPECTED" ] && [ "$EXPECTED" = "$ACTUAL" ]; then
+        PLAN_TASKS_APPROVED=true
+    fi
+fi
+
 ENVJSON=$(jq -n --argjson inv "$INV" --argjson ft "$FT" --argjson ev "$EVP" --argjson tl "$TL" \
 	--argjson man "$MAN" --argjson cp "$CURJ" \
-	'{env:{inventory:$inv,frozen_tests:$ft,evidence_present:$ev,tests_locked:$tl,evidence_manifests:$man,current_phase:$cp}}')
+	--argjson psa "$PLAN_SPEC_APPROVED" --argjson pta "$PLAN_TASKS_APPROVED" \
+	'{env:{inventory:$inv,frozen_tests:$ft,evidence_present:$ev,tests_locked:$tl,evidence_manifests:$man,current_phase:$cp,plan_spec_approved:$psa,plan_tasks_approved:$pta}}')
 
-# TMP stays project-relative: resolves via cwd under BOTH runtimes (Git Bash
-# + Windows opa during transition, WSL + /mnt/c + Linux opa after activation).
-# /tmp was rejected: Windows opa cannot read MSYS paths mid-transition.
 TMP="logs/.gate-env.$$.json"
 printf '%s' "$ENVJSON" > "$TMP"
 
@@ -49,8 +58,6 @@ eval_opa() {
 	printf '%s' "$PAYLOAD" | timeout 4 opa eval --data policies/ --data "$TMP" --stdin-input 'data.governance.decision' --format json 2>&1
 }
 
-# ERR-007 retry removed: WSL fork is native; a failed eval now logs straight
-# to GOV_GATE_DOWN so remaining instability is visible, not masked.
 OUT=$(eval_opa); RC=$?
 rm -f "$TMP"
 

@@ -44,7 +44,7 @@ valid_current_phase if {
 	regex.match(`^P\d+$`, object.get(data.env, "current_phase", ""))
 }
 
-required_evidence := sprintf("evidence/%s/manifest.json", [prev_phase])
+required_evidence := lower(sprintf("evidence/%s/manifest.json", [prev_phase]))
 
 prev_phase := sprintf("P%d", [to_number(trim_prefix(data.env.current_phase, "P")) - 1])
 

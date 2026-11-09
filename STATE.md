@@ -24,8 +24,16 @@
   ERR-013.md write payload — gate polices agent output, not just tests
 - PostToolUse hook: audit layer (tool_response + tool_use_id)
 - Subagent inner calls: visible in PARENT session log (same session_id)
+- **L2 A+B+C+D built and proven**: Layer A on PRs #1/#2; Layer B on PR #3;
+  skills adopted via skills.sh (clean-code, adversarial-reviewer,
+  quality-gate, code-review, mutation-testing) + custom logic-flow-review
+- **SonarQube**: localhost:9000 (v26.9.0), LOCAL-ONLY (owner password
+  needed for gate config; unreachable from GitHub Actions)
 
 ## 2. What is NOT protected (honest gaps)
+- governance-dev: admin bypass active on ruleset #26818941 (owner pushes
+  directly, bypasses required checks). Production projects will use
+  strict model — empty bypass + PR required (Phase 4, ERR-014, Rule 31)
 - `devin -p --config` — dormant bypass (blocked only by CLI auth wall)
 - `permissions.deny` — dead code (ERR-008) — do not rely on it
 - Local exec of destructive commands — detectable, not preventable
@@ -69,6 +77,9 @@
 - ERR-011: sha256sum binary mode breaks path parsing
 - ERR-012: P6/P7 are CI-based, not runtime — OPA cannot self-inspect
 - ERR-013: gitleaks defaults miss alphabet-sequence secrets (Rule 30)
+- ERR-014: admin bypass deviation on governance-dev (dev only; prod strict)
+- ERR-015: L2 tool install fallbacks (arborist-metrics 404, muti junk,
+  pyscn pip-not-Go, polyscan no-Python)
 - Full index: docs/errors/README.md (ERR-001..003 in Arabic old-version project)
 
 ## 5. Next steps (in order — do not skip)
@@ -79,10 +90,13 @@
 3. ~~Build policy centralization (one file = one policy)~~ — Phase 3 DONE
    (2026-11-09): auto-load proven via p11 probe, see §3 convention +
    evidence/P3/manifest.json
-4. Build one-command deployment — Phase 4
-5. Apply OOP/DRY to .rego files — Phase 5
-6. Update GOVERNANCE_SPEC.md to v1.2 — Phase 6
-7. Only after all above: apply CI to mail-assistant
+4. ~~L2 Quality Gate (A+B+C+D)~~ — DONE (2026-11-09): Layer A proven on
+   PRs #1/#2, Layer B on PR #3, 6 skills loaded, per-language adapters live
+5. Build one-command deployment — Phase 4
+6. Apply OOP/DRY to .rego files — Phase 5
+7. Update GOVERNANCE_SPEC.md to v1.2 — Phase 6
+8. Only after all above: apply CI to mail-assistant
+- **Next phase**: L3 (Planning Layer) — spec/plan/tasks enforcement before code
 - Reference reads: docs/specs/GOVERNANCE_SPEC.md (v1.1),
   docs/plans/GOVERNANCE_BUILD_PLAN.md, approvals/approval.md (A-002)
 
@@ -90,6 +104,10 @@
 - Governance: C:/governance-dev/policies/ (gate.sh, main.rego, p1-p5.rego,
   .governance/tool-inventory.txt; backups: gate.sh.gitbash.bak,
   gate.sh.timeout.bak)
+- L2 workflows: C:/governance-dev/.github/workflows/ (quality-gate.yml,
+  quality-gate-perlang.yml, policy-lint.yml, secret-scan.yml)
+- L2 skills: C:/governance-dev/.devin/skills/ (clean-code, adversarial-
+  reviewer, quality-gate, code-review, mutation-testing, logic-flow-review)
 - Logs: C:/governance-dev/logs/gate.log (also b1.0-pretool.log,
   b1.0-discovery.log)
 - Config: %APPDATA%/devin/config.json (PreToolUse, fail_closed:true;
@@ -97,10 +115,15 @@
 - CI testbed: github.com/ErrWin666/ci-test (tests.lock, CODEOWNERS,
   workflows: test-lock-verify + policy-lint + secret-scan, .gitleaks.toml,
   ruleset #26814146)
+- Governance repo: github.com/ErrWin666/governance-dev (ruleset #26818941,
+  admin bypass per ERR-014)
 
 ## 7. Recovery procedures
 - fail_closed locks everything: edit %APPDATA%/devin/config.json in Notepad
   → remove fail_closed (or restore config.json.bak-failclosed) → new session
 - gate.sh missing: restore from gate.sh.gitbash.bak
 - WSL corrupt: `wsl --shutdown` then restart
+- SonarQube down: `docker start sonarqube` (port 9000); password reset via
+  `docker exec sonarqube cat /opt/sonarqube/data/initial_admin_password`
 - CI broken: check `wsl gh api repos/ErrWin666/ci-test/rulesets/26814146`
+  or `wsl gh api repos/ErrWin666/governance-dev/rulesets/26818941`
