@@ -81,7 +81,8 @@
 - ERR-014: admin bypass deviation on governance-dev (dev only; prod strict)
 - ERR-015: L2 tool install fallbacks (arborist-metrics 404, muti junk,
   pyscn pip-not-Go, polyscan no-Python)
-- Full index: docs/errors/README.md (ERR-001..003 in Arabic old-version project)
+- Full index: docs/errors/README.md (ERR-001..003 in the archived Arabic
+  project — now at C:/governance-dev-archive/مشروع اختبار/)
 
 ## 5. Next steps (in order — do not skip)
 1. ~~Complete documentation~~ — Phase 1 DONE
@@ -116,7 +117,11 @@
   backup: config.json.bak-failclosed)
 - CI testbed: github.com/ErrWin666/ci-test (tests.lock, CODEOWNERS,
   workflows: test-lock-verify + policy-lint + secret-scan, .gitleaks.toml,
-  ruleset #26814146)
+  ruleset #26814146). Local clone moved out of the repo tree to
+  C:/governance-dev-archive/ci-test (2026-11-09) — re-clone if needed
+- Repo cleanup 2026-11-09: debris dirs out to C:/governance-dev-archive/;
+  architecture/ → docs/architecture/; constitution → repo root v2.0
+  (commits 7a479e0, 7488b65, 3055748, ad2d214)
 - Governance repo: github.com/ErrWin666/governance-dev (ruleset #26818941,
   admin bypass per ERR-014)
 

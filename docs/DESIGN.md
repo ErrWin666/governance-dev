@@ -48,8 +48,8 @@ governance-dev/
 │   ├── gate.log                 # DENY / GOV_GATE_DOWN / PWD-PROOF entries
 │   ├── b1.0-pretool.log         # raw payloads
 │   └── self-review.log          # L0 PROPOSED — per-response review findings + SEED lines
-├── ci-test/                     # nested repo, excluded — CI testbed
-└── old-version/ backups/        # archives, gitignored
+└── (debris archived 2026-11-09 → C:/governance-dev-archive/:
+    old-version/, trash/, backups/, Arabic test project, ci-test clone)
 ```
 
 Edit rights: `policies/` `approvals/` `evidence/` `STATE.md` — P4-protected

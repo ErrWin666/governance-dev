@@ -68,13 +68,13 @@
 | Gap ID | Missing | Why it matters | Workaround | Owner decision? |
 |---|---|---|---|---|
 | GAP-L6-01 | No copier template, no `deploy/profiles/{small,medium,erp}.yaml`, no sync | Everything stays a governance-dev demo | manual copying | YES — after L5 per roadmap, or earlier if owner reprioritizes |
-| GAP-L6-02 | Repo not template-ready: `ci-test/`, `old-version/`, Arabic test project, root test artifacts inside the tree | Template would copy debris | `.gitignore`/cleanup needed first | no |
+| ~~GAP-L6-02~~ ✅ CLOSED | Debris dirs moved to C:/governance-dev-archive/ (old-version, trash, backups, Arabic project, ci-test clone); tree is template-shaped (2026-11-09, commit 7a479e0) | — | — | — |
 
 ## Cross-cutting / constitution
 
 | Gap ID | Missing | Why it matters | Workaround | Owner decision? |
 |---|---|---|---|---|
-| GAP-X-01 | GOVERNANCE_SPEC not at v1.2 — file header says v1.0 while STATE.md calls it v1.1 | The constitution's own version is already false | update at end per roadmap | no |
+| ~~GAP-X-01~~ ✅ CLOSED | GOVERNANCE_SPEC moved to repo root + bumped to v2.0 with correction log (2026-11-09, commit 3055748); dead Rule 21 retired | — | — | — |
 | ~~GAP-X-02~~ ✅ CLOSED | tree committed; only owner-file `current_phase` remains untracked | — | — | — |
 | GAP-X-03 | approval.md holds only A-002; README references A-001 that does not exist; approvals are interim text (ERR-001 mechanism) | Approval record is thinner than the docs imply | keep A-XXX discipline | no |
 | GAP-X-04 | No runbook/how-to docs (Diátaxis gap, REASSESSMENT §3) | Ops knowledge lives in STATE.md §7 only | none | no |
