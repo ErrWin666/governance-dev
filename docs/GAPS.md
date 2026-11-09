@@ -12,7 +12,7 @@
 | GAP-L1-03 | `permissions.deny` is dead code | Anyone relying on it has no protection (ERR-008) | Never rely on it — documented | no |
 | GAP-L1-04 | Local exec of destructive commands — detectable not preventable | Fail-open seam in the Devin hook contract | Audit log review; Managed Devins at L5 | YES — accept or isolate work |
 | GAP-L1-05 | WSL/cygheap/hook crash → fail_closed locks the owner out | Proven live today: hook crash (`-1073741502`) blocked a plain `read` | Manual recovery (STATE.md §7) | YES — accept fragility or invest in watchdog |
-| GAP-L1-06 | gate.sh P12 env wiring is uncommitted (plus unplanned comment removal); p4 `lower()` fix uncommitted | Governance changes live only in the working tree — a `git checkout` silently reverts them | none | YES — commit or revert |
+| ~~GAP-L1-06~~ ✅ CLOSED | gate.sh P12 env wiring + p4 `lower()` fix — committed 82874be | — | — | — |
 | GAP-L1-07 | P6/P7 exist only on ci-test + governance-dev | No governed real project yet (that is L6) | none — blocked by L6 | no |
 | GAP-L1-08 | P4 anomaly: 10:39:25 deny cited missing `evidence/p3/manifest.json` while the file existed | Current policy set verified correct via `opa eval`, but the historical deny is unexplained — possible transient mid-edit state | re-test needed to close | no |
 | GAP-L1-09 | Supply-chain dep check + obfuscated-secret detection uncovered | Documented holes (ROADMAP §6) | deferred by design | YES — when to schedule |
@@ -37,14 +37,14 @@
 
 | Gap ID | Missing | Why it matters | Workaround | Owner decision? |
 |---|---|---|---|---|
-| GAP-L3-01 | plan/spec.md and plan/tasks.md are stubs in the working tree (real spec exists only in git history) | The "approved spec" is currently 2+6 lines of placeholder | restore from commit f02b97a | YES — restore real spec or accept stubs |
-| GAP-L3-02 | spec.approved / tasks.approved certify the stubs, not the real spec | Approval hashes now bless degraded content — the mechanism was satisfied without substance | re-approve real content | YES |
+| ~~GAP-L3-01~~ ✅ CLOSED | spec/tasks restored to real committed content | — | — | — |
+| ~~GAP-L3-02~~ ✅ CLOSED | stub-certifying .approved hashes deleted; spec is unapproved until owner records A-003 | — | — | — |
 | GAP-L3-03 | No approvals/approval.md entry records the pgen spec/tasks approval | plan/README flow requires a record; hash files alone are not owner approval | add A-003 entry | YES |
 | GAP-L3-04 | Cold-session resume never tested (ERR-016) | This IS the ROADMAP L3 completion criterion — L3 cannot be called done without it | manual owner test | YES — run a fresh session |
 | GAP-L3-05 | spec-writer/task-decomposer skills never produced a verified real spec | "Skills loaded" ≠ "skills produce good output" | none | no |
-| GAP-L3-06 | evidence/P3/manifest.json = `{}` in working tree | The evidence STATE.md cites is gone from the tree | restore from git | no |
-| GAP-L3-07 | `current_phase=P4` but the pilot has no code (`src/` empty) | Phase marker is ahead of reality — P4's evidence check guards a phase that never happened | reset marker when pgen resumes | YES |
-| GAP-L3-08 | All L3 work uncommitted: wiring, hashes, stubs, modified policies/STATE.md | One checkout loses the entire layer's live state | commit | no |
+| ~~GAP-L3-06~~ ✅ CLOSED | evidence/P3/manifest.json restored from git (full Phase-3 proof) | — | — | — |
+| GAP-L3-07 | `current_phase=P4` but the pilot has no code (`src/` empty) | Phase marker is ahead of reality — P4's evidence check guards a phase that never happened | reset marker to P0 (owner-only file) | YES |
+| ~~GAP-L3-08~~ ✅ CLOSED | all L3 work committed (82874be + a7422f0) | — | — | — |
 | GAP-L3-09 | The pgen pilot never produced working software — L3 loop never ran end-to-end | Mechanism proven, lifecycle unproven | resume pilot or archive it | YES |
 
 ## L4 — Verification
@@ -75,7 +75,7 @@
 | Gap ID | Missing | Why it matters | Workaround | Owner decision? |
 |---|---|---|---|---|
 | GAP-X-01 | GOVERNANCE_SPEC not at v1.2 — file header says v1.0 while STATE.md calls it v1.1 | The constitution's own version is already false | update at end per roadmap | no |
-| GAP-X-02 | Large uncommitted drift (13+ files incl. governance files and evidence) | Evidence integrity depends on committed truth | commit or revert each | YES |
+| ~~GAP-X-02~~ ✅ CLOSED | tree committed; only owner-file `current_phase` remains untracked | — | — | — |
 | GAP-X-03 | approval.md holds only A-002; README references A-001 that does not exist; approvals are interim text (ERR-001 mechanism) | Approval record is thinner than the docs imply | keep A-XXX discipline | no |
 | GAP-X-04 | No runbook/how-to docs (Diátaxis gap, REASSESSMENT §3) | Ops knowledge lives in STATE.md §7 only | none | no |
 | GAP-X-05 | No guard against agent overclaiming / phase-jumping | The exact failure mode that triggered this audit | `workflow-guard` skill + WORKFLOW_GUARD.md created today | no — created this session |

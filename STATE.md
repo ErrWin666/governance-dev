@@ -24,11 +24,12 @@
   ERR-013.md write payload — gate polices agent output, not just tests
 - PostToolUse hook: audit layer (tool_response + tool_use_id)
 - Subagent inner calls: visible in PARENT session log (same session_id)
-- **L2 A+B+C+D built and proven**: Layer A on PRs #1/#2; Layer B on PR #3;
-  skills adopted via skills.sh (clean-code, adversarial-reviewer,
-  quality-gate, code-review, mutation-testing) + custom logic-flow-review
-- **SonarQube**: localhost:9000 (v26.9.0), LOCAL-ONLY (owner password
-  needed for gate config; unreachable from GitHub Actions)
+- **L2 status (honest)**: Layer A proven (PRs #1/#2); Layer B proven
+  (PR #3); Layer C = 6 advisory skills installed; Layer D PARTIAL —
+  D2 Python proven, D1 JS/TS + D3 Go never run on real input
+- **SonarQube**: localhost:9000 (v26.9.0) running but UNCONFIGURED —
+  contributes zero gates today (owner password needed; unreachable
+  from GitHub Actions)
 
 ## 2. What is NOT protected (honest gaps)
 - governance-dev: admin bypass active on ruleset #26818941 (owner pushes
@@ -90,20 +91,21 @@
 3. ~~Build policy centralization (one file = one policy)~~ — Phase 3 DONE
    (2026-11-09): auto-load proven via p11 probe, see §3 convention +
    evidence/P3/manifest.json
-4. ~~L2 Quality Gate (A+B+C+D)~~ — DONE (2026-11-09): Layer A proven on
-   PRs #1/#2, Layer B on PR #3, 6 skills loaded, per-language adapters live
-5. Build one-command deployment — Phase 4
-6. Apply OOP/DRY to .rego files — Phase 5
-7. Update GOVERNANCE_SPEC.md to v1.2 — Phase 6
-8. Only after all above: apply CI to mail-assistant
-- **Next phase**: L3 (Planning Layer) — spec/plan/tasks enforcement before code
+4. L2 Quality Gate — PARTIAL (2026-11-09): A+B proven on PRs, C installed,
+   D2 only of D1/D2/D3 proven; SonarQube dormant (docs/GAPS.md)
+5. Finish L3 proof: cold-session resume test + pilot (docs/GAPS.md
+   GAP-L3-04/09); then L4 verification — the missing core
+6. Then L5 orchestration, L6 deployment (copier), spec v1.2 last
+- **Next phase**: close L3 + L2 proof gaps per docs/RECOVERY_PLAN.md;
+  no L4 work until earlier-layer gaps are closed
 - Reference reads: docs/specs/GOVERNANCE_SPEC.md (v1.1),
   docs/plans/GOVERNANCE_BUILD_PLAN.md, approvals/approval.md (A-002)
 
 ## 6. Key files
-- Governance: C:/governance-dev/policies/ (gate.sh, main.rego, p1-p5.rego,
-  .governance/tool-inventory.txt; backups: gate.sh.gitbash.bak,
-  gate.sh.timeout.bak)
+- Governance: C:/governance-dev/policies/ (gate.sh, main.rego,
+  p1-p5/p8-p10/p12_*.rego — P6/P7 are CI workflows, p11 was a deleted
+  probe; .governance/tool-inventory.txt + current_phase;
+  backups: gate.sh.gitbash.bak, gate.sh.timeout.bak)
 - L2 workflows: C:/governance-dev/.github/workflows/ (quality-gate.yml,
   quality-gate-perlang.yml, policy-lint.yml, secret-scan.yml)
 - L2 skills: C:/governance-dev/.devin/skills/ (clean-code, adversarial-
