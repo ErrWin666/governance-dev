@@ -99,7 +99,7 @@
 6. Then L5 orchestration, L6 deployment (copier), spec v1.2 last
 - **Next phase**: close L3 + L2 proof gaps per docs/RECOVERY_PLAN.md;
   no L4 work until earlier-layer gaps are closed
-- Reference reads: GOVERNANCE_SPEC.md (v2.0, repo root since 2026-11-09),
+- Reference reads: GOVERNANCE_SPEC.md (v2.2, repo root), docs/VISION.md,
   docs/plans/GOVERNANCE_BUILD_PLAN.md, approvals/approval.md (A-002)
 
 ## 6. Key files
@@ -120,8 +120,16 @@
   ruleset #26814146). Local clone moved out of the repo tree to
   C:/governance-dev-archive/ci-test (2026-11-09) — re-clone if needed
 - Repo cleanup 2026-11-09: debris dirs out to C:/governance-dev-archive/;
-  architecture/ → docs/architecture/; constitution → repo root v2.0
+  architecture/ → docs/architecture/; constitution → repo root
   (commits 7a479e0, 7488b65, 3055748, ad2d214)
+- Constitution now v2.2 English-only at repo root (303d648, 102739d,
+  6d39d04): rules 22-27 added (central config, logging, no phase-jump,
+  resumable checkpoints, logic-verify, tests-as-code), 7 roles (R6/R7
+  split), Output Rules category, owner-ergonomics principle 7
+- Limits unified to spec (338b0a5): file ≤400 / class ≤300 / function ≤40;
+  A1 gate now fails test files >400 like any source (rule 27);
+  class-size check unimplemented → GAP-L2-12
+- docs/VISION.md: owner's unified vision statement (English, 2026-11-09)
 - Governance repo: github.com/ErrWin666/governance-dev (ruleset #26818941,
   admin bypass per ERR-014)
 
