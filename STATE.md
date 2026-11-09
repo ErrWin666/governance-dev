@@ -142,3 +142,7 @@
   `docker exec sonarqube cat /opt/sonarqube/data/initial_admin_password`
 - CI broken: check `wsl gh api repos/ErrWin666/ci-test/rulesets/26814146`
   or `wsl gh api repos/ErrWin666/governance-dev/rulesets/26818941`
+## Pilot status (2026-11-09 late)
+- PR #4 pilot/pgen open: A-003 approved, evidence/P0 + src/ + tests committed, 11/11 local tests pass
+- Checks failing on clean diff → ERR-017 (run IDs 42690704xxx, causes unverified)
+- Next: read fail logs, fix, push, owner merges, then cold-resume test (GAP-L3-04)
