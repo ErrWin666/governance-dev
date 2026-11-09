@@ -1,5 +1,5 @@
 # GOVERNANCE_SPEC.md
-# Governance Specification — Version 2.2
+# Governance Specification — Version 2.3
 # Created: [date] — bumped to v2.0 on 2026-11-09 (moved to repo root + documented corrections below)
 # Owner: [your name]
 # Status: Owner-approved — the fixed reference for every session
@@ -22,6 +22,9 @@
 #    agents (rule 25); owner-ergonomics principle 7; logic-flow
 #    verification (rule 26); test files obey the same constraints as
 #    source code (rule 27) — A1's test exemption removed accordingly.
+# 6) v2.2 → v2.3 (2026-11-09): owner additions — no circular dependencies
+#    in code or process (rule 28); review loops must converge, no review
+#    deadlock (rule 29); review-cycle count as a health metric (rule 30).
 
 ---
 
@@ -311,6 +314,9 @@ These rules are **non-negotiable**. Any violation = phase failure.
 | 25 | Every pause point is resumable | Leaving a project for days must not lose the thread: status, what is done, what is next, and key pause points written in plain language so the owner and any agent resume cold without the conversation |
 | 26 | Logic is verified, not just behavior | Control flow, dead branches, and spec-vs-implementation consistency are checked — "it runs" is not proof the logic is right |
 | 27 | Test files obey the same constraints as source code | Size limits, structure, naming, and quality rules apply to tests — a 1000-line test file is a violation, not an exception |
+| 28 | No circular dependencies — in code or process | Modules, configs, services, and review chains must flow one direction (A→B, never B→A); cycles are quality defects (MITRE CQE) and can deadlock a system or a review — B1's import-linter/dependency-cruiser enforces code cycles on risky PRs |
+| 29 | Review loops must converge — no review deadlock | No review may wait on another review's output; after three identical failed rounds with no change, escalate to the owner with the blocker — do not repeat the same cycle |
+| 30 | Review cycles are measured | A PR's back-and-forth count is a health signal; exceeding 3 cycles means unclear acceptance criteria or unstable requirements — fix the cause, not another round |
 
 **Rule categories** (owner definition, v2.1): **Hard Rules** block the work
 when violated (rules 1–23 above). **Role Rules** bind one role only (e.g.,
