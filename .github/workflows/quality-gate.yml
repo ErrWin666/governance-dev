@@ -41,6 +41,7 @@ jobs:
           grep -E '\.py$' "$TMPD/qg_changed.txt" | grep -vEi '(^|/)(tests?|__tests__|testdata)(/|$)|(^|/)test_|_test\.py$|conftest\.py$' > "$TMPD/qg_py_src.txt" || true
 
       - name: A1 - File size and function size limits
+        id: a1
         run: |
           python3 - <<'PY'
           import ast, os, re
@@ -119,6 +120,8 @@ jobs:
           PY
 
       - name: A3 - Hardcoded values and magic numbers (Lyncus rules)
+        id: a3
+        if: always()
         run: |
           python3 -m pip install --quiet 'lyncus==1.0.5'
           python3 - <<'PY'
@@ -148,6 +151,8 @@ jobs:
           PY
 
       - name: A4 - API contract guard
+        id: a4
+        if: always()
         run: |
           TMPD="${RUNNER_TEMP:-/tmp}"
           specs=$(grep -Ei '(openapi|swagger)\.(json|ya?ml)$' "$TMPD/qg_changed.txt" || true)
@@ -181,6 +186,8 @@ jobs:
           [ "$failed" -eq 0 ] && echo "A4 passed: no breaking API changes" || exit 1
 
       - name: A5 - Mutation testing (mutmut, diff-scoped)
+        id: a5
+        if: always()
         run: |
           TMPD="${RUNNER_TEMP:-/tmp}"
           PY_SRC=$(cat "$TMPD/qg_py_src.txt")
@@ -242,6 +249,8 @@ jobs:
           PY
 
       - name: A6 - Coverage on changed lines
+        id: a6
+        if: always()
         run: |
           TMPD="${RUNNER_TEMP:-/tmp}"
           PY_SRC=$(cat "$TMPD/qg_py_src.txt")
@@ -280,11 +289,15 @@ jobs:
           echo "No Python source changed and no jest project found - skipping A6 (other languages need per-language adapters, phase L2d)."
 
       - name: A7 - Duplication (jscpd)
+        id: a7
+        if: always()
         run: |
           npm install --global --no-audit --no-fund 'jscpd@5.4.3'
           jscpd --min-tokens 50 --threshold 5 --ignore '**/mutants/**' --ignore '**/coverage/**' --ignore '**/coverage.xml' . || exit 1
 
       - name: A8 - Debug leftovers and silenced errors
+        id: a8
+        if: always()
         run: |
           TMPD="${RUNNER_TEMP:-/tmp}"
           failed=0
@@ -308,3 +321,27 @@ jobs:
             exit 1
           fi
           echo "A8 passed: no debug leftovers or silenced errors"
+
+      - name: Gate summary
+        if: always()
+        env:
+          A1: ${{ steps.a1.outcome }}
+          A3: ${{ steps.a3.outcome }}
+          A4: ${{ steps.a4.outcome }}
+          A5: ${{ steps.a5.outcome }}
+          A6: ${{ steps.a6.outcome }}
+          A7: ${{ steps.a7.outcome }}
+          A8: ${{ steps.a8.outcome }}
+        run: |
+          failed=0
+          for pair in A1:size-limits A3:hardcoded-values A4:api-contract A5:mutation-score A6:diff-coverage A7:duplication A8:debug-leftovers; do
+            id="${pair%%:*}"; label="${pair#*:}"
+            eval "res=\$$id"
+            printf '  %-3s %-18s %s\n' "$id" "$label" "${res:-skipped}"
+            [ "$res" = "failure" ] && failed=1
+          done
+          if [ "$failed" -ne 0 ]; then
+            echo "::error::quality-gate FAILED - see check output above"
+            exit 1
+          fi
+          echo "quality-gate PASSED - all checks green"
