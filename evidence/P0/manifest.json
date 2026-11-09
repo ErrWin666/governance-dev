@@ -1,0 +1,21 @@
+{
+  "phase": "P0",
+  "title": "pgen pilot — exploration & planning (spec + tasks approved)",
+  "status": "complete",
+  "completed": "2026.11.09",
+  "artifacts": [
+    "plan/spec.md (35 lines: problem, scope, stack, functions, CLI, tests)",
+    "plan/tasks.md (5 tasks: 3 functions + tests + gates)",
+    "plan/test-plan.md",
+    "plan/architecture.md",
+    "plan/spec.approved (sha256 seal)",
+    "plan/tasks.approved (sha256 seal)",
+    "approvals/approval.md entry A-003"
+  ],
+  "verification": {
+    "owner_approval": "A-003 recorded 2026.11.09 — spec + tasks approved in-session",
+    "seal_mechanism": "gate.sh sha256-compares plan/*.md vs plan/*.approved",
+    "P12_state": "plan_spec_approved + plan_tasks_approved = true (verified via gate env)"
+  },
+  "note": "First project to walk the L3 lifecycle end-to-end (GAP-L3-09)."
+}
