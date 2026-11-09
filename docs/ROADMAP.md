@@ -141,7 +141,8 @@ Evidence flows as files (plan/, evidence/Pn/, PR diff) — never as conversation
 | Check | Concrete rule | Deterministic? | Tool | Status |
 |---|---|---|---|---|
 | File size | ≤400 lines src, ≤100 .rego | yes — fails build | wc/ast + brace heuristic in quality-gate (A1) | **implemented L2a** |
-| Function size | ≤50 lines, ≤4 params | yes | python ast (.py) + brace-span heuristic (JS/TS/Go/…) in quality-gate (A1) | **implemented L2a** (≤4 params deferred to L2d) |
+| Class size | ≤300 lines | yes | not yet enforced — GAP-L2-12 | spec v2.1, gate pending |
+| Function size | ≤40 lines, ≤4 params | yes | python ast (.py) + brace-span heuristic (JS/TS/Go/…) in quality-gate (A1, threshold updated to 40 per spec v2.1) | **implemented L2a** (≤4 params deferred to L2d) |
 | Complexity | cyclomatic ≤10, nest depth ≤3 | yes | ESLint complexity, max-depth / ruff | planned (L2d per-language) |
 | Duplication | >5% copied tokens fails | yes | jscpd --min-tokens 50 --threshold 5 (A7) | **implemented L2a** |
 | Secrets | sk-/AWS/key patterns + custom | yes | gitleaks + .gitleaks.toml + P3 | implemented (P7) |
@@ -213,7 +214,7 @@ Honest split: ~8 deterministic build-failers, ~3 judgment-only. Deterministic ga
 6. Merge authority: can coordinator merge green low-risk PRs, or is owner approval always required? Assume always until told.
    **Default:** owner approval always required — no auto-merge path in dev or production. Rationale: the entire system exists because self-approval fails; a coordinator that can merge is the implementer loophole moved up one level.
 7. Quality limits: file ≤400 / function ≤50 correct for owner's style, or stricter?
-   **Default:** file ≤400 src / ≤100 .rego (proven convention), function ≤50 lines, ≤4 params, cyclomatic ≤10. Rationale: .rego 100-line cap already enforced by policy-lint; 400/50 matches agent context-window ergonomics (the real reason for the cap).
+   **DECIDED (owner, spec v2.1):** stricter — file ≤400 src / ≤100 .rego, **class ≤300**, **function ≤40 lines**, ≤4 params, cyclomatic ≤10. A1 threshold updated to 40; class check pending (GAP-L2-12).
 8. Evidence format: self-asserted manifest.json vs signed attestations.
    **DECIDED (owner):** adopt in-toto attestation shape (Statement+Predicate+Subject) at L4 build; verdict artifacts follow the same shape.
 9. Test adequacy: tests' integrity is protected (P2/test-lock) but their competence is unchecked.

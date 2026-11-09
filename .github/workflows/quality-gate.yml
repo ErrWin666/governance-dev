@@ -47,7 +47,7 @@ jobs:
           import ast, os, re
 
           TMP = os.environ.get('RUNNER_TEMP') or os.sep + 'tmp'
-          MAX_FILE, MAX_REGO, MAX_FUNC = 400, 100, 50
+          MAX_FILE, MAX_REGO, MAX_FUNC = 400, 100, 40  # spec v2.1 (class ≤300 not yet enforced — GAP-L2-12)
           SRC_EXT = {'.py','.js','.jsx','.ts','.tsx','.mjs','.cjs','.go','.java','.rb','.php',
                      '.rs','.c','.cc','.cpp','.cxx','.h','.hpp','.cs','.kt','.kts','.swift',
                      '.dart','.scala','.m','.mm','.groovy','.pl','.lua','.r','.jl','.ex','.exs'}

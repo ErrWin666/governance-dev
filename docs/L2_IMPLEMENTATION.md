@@ -14,7 +14,7 @@ Required status check `quality-gate` added to ruleset `protect-main` (admin bypa
 
 | ID | Gate | Tool / method | Version | Install in CI | Fail condition |
 |----|------|---------------|---------|---------------|----------------|
-| A1 | File + function size | embedded python: `wc`-style line count, `ast` for .py, brace-span heuristic for brace langs | — | none | src >400 lines (tests exempt), .rego >100 lines, function >50 lines |
+| A1 | File + function size | embedded python: `wc`-style line count, `ast` for .py, brace-span heuristic for brace langs | — | none | src >400 lines (tests exempt), .rego >100 lines, function >40 lines (spec v2.1; class ≤300 not yet checked — GAP-L2-12) |
 | A2 | Secrets | gitleaks | 8.24.3 | separate `secret-scan.yml` (pre-existing P7) | any finding |
 | A3 | Hardcoded values + magic numbers | **Lyncus rule engine** (`Lyncus.rules.hardcode_rules.scan_file_for_hardcode` imported directly) | 1.0.5 | `pip install lyncus==1.0.5` | any CREDENTIAL / DATABASE / HARDPATH / HARDURL / MAGICNUM match in changed files |
 | A4 | API contract | **api-contract-guard** `--mode openapi --fail-on-breaking` | 0.2.0 | `pip install api-contract-guard==0.2.0 pyyaml` | breaking change vs base spec (removed op/status, removed/changed schema props); YAML converted to JSON first |

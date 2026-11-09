@@ -32,6 +32,7 @@
 | GAP-L2-09 | A1 function-size is a brace heuristic for non-Python | Can miss/overshoot vs exact parse | documented limit | no |
 | GAP-L2-10 | A3 scans whole changed file, not just the diff | Pre-existing violations fail the PR — intentional but noisy | fail-closed by design | no |
 | GAP-L2-11 | L2c skills are advisory-only; nothing tracks whether findings are acted on | Advisory findings can be silently ignored | by design | YES — keep advisory or gate on findings |
+| GAP-L2-12 | Class-size check unimplemented — spec v2.1 sets class ≤300 but A1 only counts files + functions | A 300+ line class in a ≤400-line file passes the gate | file cap catches worst case | no |
 
 ## L3 — Planning
 

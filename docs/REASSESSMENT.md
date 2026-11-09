@@ -163,7 +163,7 @@ copier copy --data-file profiles/medium.yaml gh:ErrWin666/governance-dev <projec
 | 4 | Skeptic vs attacker split | same/different sessions | **DECIDED (owner): single adversarial role now; split sessions at ERP** | L4/L5 |
 | 5 | Verifier trigger | every PR / threshold | threshold: >200 lines or protected paths; antemortem always | L4 cost |
 | 6 | Merge authority | owner/auto | owner always | all |
-| 7 | Quality limits | numbers | 400/50/10 adopted | L2 |
+| 7 | Quality limits | numbers | spec v2.1: file 400 / class 300 / function 40 / cc 10 | L2 |
 | 8 | Evidence format | JSON / in-toto / hash-chain | **DECIDED (owner): in-toto Statement shape at L4 build; mutation-test gate on touched tests also adopted at L4** | L4 |
 | 9 | Deploy tool | sync.sh / copier / git subtree | **DECIDED (owner): copier — `copy` installs, `update` propagates** | L6 |
 
