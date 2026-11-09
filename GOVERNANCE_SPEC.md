@@ -1,5 +1,5 @@
 # GOVERNANCE_SPEC.md
-# Governance Specification — Version 2.0
+# Governance Specification — Version 2.1
 # Created: [date] — bumped to v2.0 on 2026-11-09 (moved to repo root + documented corrections below)
 # Owner: [your name]
 # Status: Owner-approved — the fixed reference for every session
@@ -12,6 +12,11 @@
 # 3) Language: this document is now English-only (owner directive
 #    2026-11-09). The v1.x Arabic original is preserved in git history and
 #    at C:/governance-dev-archive/GOVERNANCE_SPEC-v1-arabic.md.
+# 4) v2.0 → v2.1 (2026-11-09): six owner-confirmed tightenings —
+#    class ≤300 / function ≤40 limits; mandatory central configuration
+#    module; mandatory structured logging; Editor / Independent-Writer
+#    role split; formal Output Rules category; Phase-0 engineering-choice
+#    justification (choice + alternative + rejection reason).
 
 ---
 
@@ -46,7 +51,7 @@ before passing the previous phase's gate.
 | **Required evidence** | Signed spec + open-questions list + studied-alternatives list |
 | **Executed by** | Coordinator + Researcher |
 | **Verified by** | Owner (explicit approval) |
-| **Acceptance criteria** | • Problem is clear • User identified • Acceptance criteria testable • Out of scope defined • Alternatives documented • Open questions answered or deferred by decision |
+| **Acceptance criteria** | • Problem is clear • User identified • Acceptance criteria testable • Out of scope defined • Alternatives documented • Open questions answered or deferred by decision • Every engineering choice justified: chosen option + considered alternative + rejection reason (architecture, environment, language, tools, libraries) |
 
 **Rule**: no code in this phase. No project files. Only the spec document.
 
@@ -85,14 +90,16 @@ before passing the previous phase's gate.
 | **Required evidence** | • `git diff` of the code • `test-report.log` (full, not summarized) • `coverage-report.html` • `lint-report.log` • `sonarqube-report.json` • `evidence-manifest.json` |
 | **Executed by** | Implementer (in isolated VM) |
 | **Verified by** | Verifier (automated) + Skeptic (sample) |
-| **Acceptance criteria** | • Every test in `test-plan.md` exists • Coverage ≥ 80% • No lint errors • SonarQube: no Bug or Vulnerability issues • File size ≤ 400 lines • Function size ≤ 50 lines • No hardcoded secrets • `git diff` matches the blueprint |
+| **Acceptance criteria** | • Every test in `test-plan.md` exists • Coverage ≥ 80% • No lint errors • SonarQube: no Bug or Vulnerability issues • File ≤400 lines • Class ≤300 lines • Function ≤40 lines • Central configuration module exists — every tunable value in one documented place • Structured logging system — no scattered print/console.log • No hardcoded secrets • `git diff` matches the blueprint |
 
 **Strict implementation rules:**
 - **Forbidden** to modify test files after `tests.hash` (detected via hash mismatch).
 - **Forbidden** to write everything at once — work is split into small tasks (each ≤ 200 lines changed).
 - **Forbidden** hardcoded secrets (detected by gitleaks).
 - **Forbidden** variable duplication (detected by SonarQube duplication).
-- **Forbidden** exceeding 400 lines/file or 50 lines/function (detected by CI script).
+- **Forbidden** exceeding 400 lines/file, 300 lines/class, or 40 lines/function (detected by CI script).
+- **Forbidden** tunable values buried in code — every configurable value lives in the central configuration module (one file, documented: what each value means and where it is used).
+- **Forbidden** scattered `print`/`console.log` — logging goes through the project's logging system only.
 - **Forbidden** "working" code without a test (0% coverage = failure).
 - **Forbidden** fixing broken code by editing the test (detected by hash).
 
@@ -126,13 +133,13 @@ before passing the previous phase's gate.
 
 | Project size | Phases | Mechanisms | Roles |
 |---|---|---|---|
-| Small (≤ 500 lines) | P0, P3, P5 | M1, M2, M4, M8 | R1, R3, R4, R6 |
+| Small (≤ 500 lines) | P0, P3, P5 | M1, M2, M4, M8 | R1, R3, R4, R6/R7 |
 | Medium | P0–P5 | M1–M8 (M6 only for web apps) | All except R5 (unless needed) |
 | Large | P0–P5 + M6 | All mechanisms | All roles |
 
 ---
 
-## 2. Roles — 5 core roles
+## 2. Roles — 7 core roles
 
 Each role works in an **isolated VM** (Managed Devin) or a **coordination
 session** (the Coordinator). No role sees what it does not need.
@@ -182,14 +189,23 @@ session** (the Coordinator). No role sees what it does not need.
 - **Isolation**: isolated VM (read-only + attack tools).
 - **Quality bar**: every vulnerability classified (CVSS), with an exploit scenario and a proposed fix.
 
-### R6 — Writer/Consultant
+### R6 — Editor
 
-- **Responsibility**: draft the final summary from evidence, give expert opinion (consultant) when needed.
+- **Responsibility**: edit the final documentation and draft the evidence summary.
 - **Does NOT**: add claims not present in the evidence, decide, implement.
 - **Inputs**: all of `evidence/`.
 - **Outputs**: `evidence/P5/summary.md`, `release/changelog.md`.
 - **Isolation**: isolated VM (read-only).
 - **Quality bar**: every sentence in the summary has a reference in the evidence.
+
+### R7 — Independent Writer
+
+- **Responsibility**: author the final output in isolation from the Implementer — reviews coherence and wording without ever seeing the implementer's narrative.
+- **Does NOT**: implement, decide, take the implementer's account as input.
+- **Inputs**: approved evidence bundles + artifacts only.
+- **Outputs**: the final deliverable document/report.
+- **Isolation**: isolated VM (read-only, no shared context with R3).
+- **Quality bar**: output stands on artifacts alone — nothing traceable to the implementer's story.
 
 ---
 
@@ -265,8 +281,8 @@ These rules are **non-negotiable**. Any violation = phase failure.
 | 2 | No success claim without evidence | Mandatory evidence bundle per phase |
 | 3 | No editing tests to satisfy broken code | `tests.hash` + CI check |
 | 4 | No hardcoded secrets | gitleaks + SonarQube + OPA |
-| 5 | No file > 400 lines | CI script |
-| 6 | No function > 50 lines | CI script |
+| 5 | No file > 400 lines, no class > 300 lines | CI script |
+| 6 | No function > 40 lines | CI script |
 | 7 | No variable duplication | SonarQube duplication |
 | 8 | No code without a test | coverage gate (≥80%) |
 | 9 | No silently changing spec | `spec.hash` + check before each phase |
@@ -282,6 +298,14 @@ These rules are **non-negotiable**. Any violation = phase failure.
 | 19 | `size:` is mandatory in the phase contract | every phase-contract declares project size (small/medium/large) — activates the proportional table; not accepted without it |
 | 20 | Build phases follow M8 | GOVERNANCE_BUILD_PLAN itself is subject to approval — no transition between build phases (B<n>) without a recorded owner approval in `approvals/` |
 | ~~21~~ | ~~Mandatory single runtime (Single-Environment Mandate)~~ — **RETIRED** | Required Git Bash only; retired because Git Bash proved unreliable (cygheap fork failures, ERR-007) and the runtime of record became WSL (ADR-001). Its spirit survives: policies like `wsl -u root` (P1) remain in force |
+| 22 | Every tunable value lives in a central configuration module | One file holds all configurable values, each documented (meaning + where used); a value buried in code is a violation regardless of function |
+| 23 | Structured logging only | A defined logging system for every significant event; scattered `print`/`console.log`/`debugger` in shipped code = failure |
+
+**Rule categories** (owner definition, v2.1): **Hard Rules** block the work
+when violated (rules 1–23 above). **Role Rules** bind one role only (e.g.,
+the Verifier never writes code — section 2). **Output Rules** format what
+reaches the owner — ADHD-style output: concise, numbered steps, no preamble;
+reports short and decision-first.
 
 ---
 
