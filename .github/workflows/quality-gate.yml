@@ -1,0 +1,310 @@
+name: quality-gate
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: quality-gate-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  quality-gate:
+    name: quality-gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      BASE_SHA: ${{ github.event.pull_request.base.sha }}
+      PYTHONUTF8: "1"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Compute changed files
+        run: |
+          TMPD="${RUNNER_TEMP:-/tmp}"
+          git diff --name-only --diff-filter=ACMR "${BASE_SHA}...HEAD" | sort -u > "$TMPD/qg_changed.txt"
+          echo "Changed files:"
+          cat "$TMPD/qg_changed.txt"
+          grep -E '\.py$' "$TMPD/qg_changed.txt" | grep -vEi '(^|/)(tests?|__tests__|testdata)(/|$)|(^|/)test_|_test\.py$|conftest\.py$' > "$TMPD/qg_py_src.txt" || true
+
+      - name: A1 - File size and function size limits
+        run: |
+          python3 - <<'PY'
+          import ast, os, re
+
+          TMP = os.environ.get('RUNNER_TEMP') or os.sep + 'tmp'
+          MAX_FILE, MAX_REGO, MAX_FUNC = 400, 100, 50
+          SRC_EXT = {'.py','.js','.jsx','.ts','.tsx','.mjs','.cjs','.go','.java','.rb','.php',
+                     '.rs','.c','.cc','.cpp','.cxx','.h','.hpp','.cs','.kt','.kts','.swift',
+                     '.dart','.scala','.m','.mm','.groovy','.pl','.lua','.r','.jl','.ex','.exs'}
+          BRACE_EXT = {'.js','.jsx','.ts','.tsx','.mjs','.cjs','.go','.java','.php','.rs',
+                       '.c','.cc','.cpp','.cxx','.h','.hpp','.cs','.kt','.kts','.swift',
+                       '.dart','.scala','.groovy'}
+          TEST_RE = re.compile(r'(^|/)(tests?|__tests__|testdata)(/|$)|(test_|_test\.|\.test\.|\.spec\.)', re.I)
+          CONTROL = re.compile(r'^\s*(if|elif|else|for|foreach|while|switch|catch|do|try|finally|return|when|match|with|using|lock)\b')
+          FUNC_SIG = re.compile(r'(?:function\s+\w+|func\s+(?:\([^)]*\)\s*)?\w+|(?:[\w~!@$%^&*\-\[\]<>,\s.:]+\s+)?[\w~]+\s*\([^;{}]*\)\s*(?:const|noexcept|override|final|throws[\w, .<>]*)?\s*(?:->\s*[\w<>\[\],&*\s.:]+)?\{|=>)')
+
+          failed = False
+          def err(path, line, msg):
+              global failed
+              failed = True
+              print(f"::error file={path},line={max(1,line)}::{msg}")
+
+          def check_py_funcs(path):
+              try:
+                  tree = ast.parse(open(path, encoding='utf-8', errors='replace').read())
+              except SyntaxError:
+                  return
+              for node in ast.walk(tree):
+                  if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                      span = node.end_lineno - node.lineno + 1
+                      if span > MAX_FUNC:
+                          err(path, node.lineno, f"function '{node.name}' is {span} lines (max {MAX_FUNC})")
+
+          def check_brace_funcs(path):
+              lines = open(path, encoding='utf-8', errors='replace').read().splitlines()
+              n = len(lines); i = 0
+              while i < n:
+                  line = lines[i]
+                  if '{' in line and FUNC_SIG.search(line) and not CONTROL.match(line):
+                      start = i; depth = 0; opened = False; j = i
+                      while j < n:
+                          depth += lines[j].count('{') - lines[j].count('}')
+                          if '{' in lines[j]: opened = True
+                          if opened and depth <= 0: break
+                          j += 1
+                      span = j - start + 1
+                      if opened and span > MAX_FUNC:
+                          err(path, start + 1, f"function-like block is {span} lines (max {MAX_FUNC})")
+                      i = j + 1 if opened else i + 1
+                  else:
+                      i += 1
+
+          for path in [l.strip() for l in open(os.path.join(TMP, 'qg_changed.txt')) if l.strip()]:
+              if not os.path.isfile(path):
+                  continue
+              ext = os.path.splitext(path)[1].lower()
+              is_test = bool(TEST_RE.search(path))
+              if ext == '.rego':
+                  n = sum(1 for _ in open(path, encoding='utf-8', errors='replace'))
+                  if n > MAX_REGO:
+                      err(path, MAX_REGO + 1, f"rego file has {n} lines (max {MAX_REGO})")
+                  continue
+              if ext not in SRC_EXT:
+                  continue
+              n = sum(1 for _ in open(path, encoding='utf-8', errors='replace'))
+              if not is_test and n > MAX_FILE:
+                  err(path, MAX_FILE + 1, f"source file has {n} lines (max {MAX_FILE})")
+              if ext == '.py':
+                  check_py_funcs(path)
+              elif ext in BRACE_EXT:
+                  check_brace_funcs(path)
+
+          if failed:
+              raise SystemExit("A1 failed: size limits exceeded")
+          print("A1 passed: file/function sizes within limits")
+          PY
+
+      - name: A3 - Hardcoded values and magic numbers (Lyncus rules)
+        run: |
+          python3 -m pip install --quiet 'lyncus==1.0.5'
+          python3 - <<'PY'
+          import os
+          from Lyncus.rules.hardcode_rules import scan_file_for_hardcode
+
+          TMP = os.environ.get('RUNNER_TEMP') or os.sep + 'tmp'
+          KEEP = {"CREDENTIAL", "DATABASE", "HARDPATH", "HARDURL", "MAGICNUM"}
+          failed = False
+          for path in [l.strip() for l in open(os.path.join(TMP, 'qg_changed.txt')) if l.strip()]:
+              if not os.path.isfile(path):
+                  continue
+              try:
+                  content = open(path, encoding='utf-8', errors='replace').read()
+              except OSError:
+                  continue
+              if '\x00' in content:
+                  continue
+              for m in scan_file_for_hardcode(path, content):
+                  if m.category not in KEEP:
+                      continue
+                  failed = True
+                  print(f"::error file={path},line={m.line}::{m.severity} {m.category} {m.rule_id}: {m.description} [{m.matched_text}]")
+          if failed:
+              raise SystemExit("A3 failed: hardcoded values / magic numbers found")
+          print("A3 passed: no hardcoded credentials, paths, URLs or magic numbers")
+          PY
+
+      - name: A4 - API contract guard
+        run: |
+          TMPD="${RUNNER_TEMP:-/tmp}"
+          specs=$(grep -Ei '(openapi|swagger)\.(json|ya?ml)$' "$TMPD/qg_changed.txt" || true)
+          if [ -z "$specs" ]; then
+            echo "No OpenAPI/Swagger spec changed - skipping A4."
+            exit 0
+          fi
+          python3 -m pip install --quiet 'api-contract-guard==0.2.0' pyyaml
+          failed=0
+          while IFS= read -r spec; do
+            [ -f "$spec" ] || continue
+            echo "--- checking $spec against base"
+            if ! git show "${BASE_SHA}:${spec}" > "$TMPD/qg_base_spec" 2>/dev/null; then
+              echo "::notice::$spec is new in this PR - no base contract to break."
+              continue
+            fi
+            python3 - "$spec" "$TMPD" <<'PY'
+          import json, os, sys, yaml
+          def load(p):
+              txt = open(p, encoding='utf-8', errors='replace').read()
+              try:
+                  return json.loads(txt)
+              except json.JSONDecodeError:
+                  return yaml.safe_load(txt)
+          tmpd = sys.argv[2]
+          json.dump(load(os.path.join(tmpd, 'qg_base_spec')), open(os.path.join(tmpd, 'qg_base.json'), 'w'))
+          json.dump(load(sys.argv[1]), open(os.path.join(tmpd, 'qg_head.json'), 'w'))
+          PY
+            api-contract-guard "$TMPD/qg_base.json" "$TMPD/qg_head.json" --mode openapi --fail-on-breaking || failed=1
+          done <<< "$specs"
+          [ "$failed" -eq 0 ] && echo "A4 passed: no breaking API changes" || exit 1
+
+      - name: A5 - Mutation testing (mutmut, diff-scoped)
+        run: |
+          TMPD="${RUNNER_TEMP:-/tmp}"
+          PY_SRC=$(cat "$TMPD/qg_py_src.txt")
+          if [ -z "$PY_SRC" ]; then
+            echo "No changed Python source files - skipping A5 (muti is not a real package; mutmut is the Py fallback, Stryker needs per-project config)."
+            exit 0
+          fi
+          if ! git ls-files | grep -qE '(^|/)test_.*\.py$|_test\.py$'; then
+            echo "::notice::Changed Python source found but no Python test files exist - mutation score cannot be computed. Skipping A5."
+            exit 0
+          fi
+          python3 -m pip install --quiet 'mutmut==3.8.1' pytest
+          python3 - <<'PY'
+          import configparser, os
+          tmp = os.environ.get('RUNNER_TEMP') or os.sep + 'tmp'
+          src_files = [l.strip() for l in open(os.path.join(tmp, 'qg_py_src.txt')) if l.strip()]
+          dirs = []
+          for f in src_files:
+              d = os.path.dirname(f)
+              dirs.append(d if d else f)
+          dirs = sorted(set(dirs))
+          cfg = configparser.ConfigParser()
+          cfg.read('setup.cfg')
+          if not cfg.has_section('mutmut'):
+              cfg.add_section('mutmut')
+          cfg.set('mutmut', 'source_paths', '\n' + '\n'.join(dirs))
+          cfg.set('mutmut', 'only_mutate', '\n' + '\n'.join(src_files))
+          with open('setup.cfg', 'w') as fh:
+              cfg.write(fh)
+          print("mutmut source_paths:", dirs)
+          print("mutmut only_mutate:", src_files)
+          PY
+          mutmut run || exit 1
+          mutmut results --all > "$TMPD/qg_mutres.txt" || true
+          python3 - <<'PY'
+          import os, re, sys
+          tmp = os.environ.get('RUNNER_TEMP') or os.sep + 'tmp'
+          killed = checked = 0
+          statuses = {}
+          for line in open(os.path.join(tmp, 'qg_mutres.txt'), encoding='utf-8', errors='replace'):
+              m = re.search(r':\s*(\w+)\s*$', line.strip())
+              if not m:
+                  continue
+              st = m.group(1)
+              statuses[st] = statuses.get(st, 0) + 1
+              if st in {'killed', 'survived', 'no_tests', 'timeout', 'suspicious', 'segfault'}:
+                  checked += 1
+                  if st == 'killed':
+                      killed += 1
+          print("mutant statuses:", statuses)
+          if checked == 0:
+              print("::notice::No mutants produced for changed files - passing.")
+              sys.exit(0)
+          score = killed * 100 // checked
+          print(f"Mutation score on changed code: {score}% ({killed}/{checked} killed)")
+          if score < 60:
+              print("::error::Mutation score below 60% - tests are too weak")
+              sys.exit(1)
+          PY
+
+      - name: A6 - Coverage on changed lines
+        run: |
+          TMPD="${RUNNER_TEMP:-/tmp}"
+          PY_SRC=$(cat "$TMPD/qg_py_src.txt")
+          if [ -n "$PY_SRC" ]; then
+            if ! git ls-files | grep -qE '(^|/)test_.*\.py$|_test\.py$'; then
+              echo "::notice::Changed Python source found but no Python test files exist - diff coverage cannot be measured. Skipping A6."
+              exit 0
+            fi
+            python3 -m pip install --quiet pytest pytest-cov diff-cover
+            python3 -m pytest --ignore=mutants --cov=. --cov-report=xml -q || exit 1
+            python3 - <<'PY'
+          import os, sys
+          import xml.etree.ElementTree as ET
+          tmp = os.environ.get('RUNNER_TEMP') or os.sep + 'tmp'
+          changed = [l.strip() for l in open(os.path.join(tmp, 'qg_py_src.txt')) if l.strip()]
+          covered = set()
+          for cls in ET.parse('coverage.xml').getroot().iter('class'):
+              covered.add((cls.get('filename') or '').replace('\\', '/'))
+          missing = [f for f in changed if f not in covered]
+          for f in missing:
+              print(f"::error file={f}::changed source file has zero coverage instrumentation (never imported by tests)")
+          if missing:
+              sys.exit(1)
+          PY
+            diff-cover coverage.xml --compare-branch "$BASE_SHA" --fail-under 80
+            exit $?
+          fi
+          if [ -f package.json ] && grep -qE '"(jest|@jest/)"' package.json; then
+            echo "jest detected - running JS diff coverage"
+            npm ci --ignore-scripts --no-audit --no-fund
+            npx jest --coverage --coverageReporters=cobertura --passWithNoTests || exit 1
+            python3 -m pip install --quiet diff-cover
+            diff-cover coverage/cobertura-coverage.xml --compare-branch "$BASE_SHA" --fail-under 80
+            exit $?
+          fi
+          echo "No Python source changed and no jest project found - skipping A6 (other languages need per-language adapters, phase L2d)."
+
+      - name: A7 - Duplication (jscpd)
+        run: |
+          npm install --global --no-audit --no-fund 'jscpd@5.4.3'
+          jscpd --min-tokens 50 --threshold 5 --ignore '**/mutants/**' --ignore '**/coverage/**' --ignore '**/coverage.xml' . || exit 1
+
+      - name: A8 - Debug leftovers and silenced errors
+        run: |
+          TMPD="${RUNNER_TEMP:-/tmp}"
+          failed=0
+          while IFS= read -r f; do
+            [ -f "$f" ] || continue
+            ext="${f##*.}"
+            case "$ext" in
+              py) pat='\bprint\s*\(|pdb\.set_trace|breakpoint\s*\(|except\s*:';;
+              js|jsx|ts|tsx|mjs|cjs) pat='console\.log\s*\(|debugger\s*;?|catch\s*\([^)]*\)\s*\{\s*\}';;
+              *) continue;;
+            esac
+            hits=$(git diff -U0 "${BASE_SHA}...HEAD" -- "$f" | grep -P '^\+' | grep -vP '^\+\+\+' | grep -nP "$pat" || true)
+            if [ -n "$hits" ]; then
+              failed=1
+              echo "::error file=$f::debug leftover / silenced error in added lines:"
+              echo "$hits" | sed 's/^/    /'
+            fi
+          done < "$TMPD/qg_changed.txt"
+          if [ "$failed" -ne 0 ]; then
+            echo "::error::A8 failed: debug leftovers or silenced errors found in added lines"
+            exit 1
+          fi
+          echo "A8 passed: no debug leftovers or silenced errors"
