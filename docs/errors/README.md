@@ -25,7 +25,6 @@ certain approaches failed.
 | ERR-015 | L2 tool install fallbacks (arborist 404, muti junk, pyscn, polyscan) | assumption | documented — substitutes chosen |
 | ERR-016 | cold-session resume never tested | lifecycle | tested — see GAP-L3-04 |
 | ERR-017 | `pull_request.base.sha` frozen at PR-open → checks diffed polluted file set | infrastructure | resolved (base-toggle refreshes; PR #4+#5 merged) |
-| ERR-018 | `numbers.range(1,0)` descends → whole command leaked into P13 path check | rego semantics | fixed (range(0,·)+`i>0` guard; opa test suite added) |
 
 ## File locations
 - ERR-004..ERR-017: this directory
