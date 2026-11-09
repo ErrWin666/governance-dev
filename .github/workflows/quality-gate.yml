@@ -126,6 +126,7 @@ jobs:
           python3 -m pip install --quiet 'lyncus==1.0.5'
           python3 - <<'PY'
           import os
+          import re
           from Lyncus.rules.hardcode_rules import scan_file_for_hardcode
 
           TMP = os.environ.get('RUNNER_TEMP') or os.sep + 'tmp'
@@ -140,6 +141,8 @@ jobs:
                   continue
               if '\x00' in content:
                   continue
+              # ISO dates are not magic numbers — mask before HC030 scan (ERR-017)
+              content = re.sub(r'\d{4}[-/]\d{2}[-/]\d{2}', 'YYYY-MM-DD', content)
               for m in scan_file_for_hardcode(path, content):
                   if m.category not in KEEP:
                       continue

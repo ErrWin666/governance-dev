@@ -41,8 +41,13 @@ jobs:
             head -n 1 "$f" | grep -q '^# WHY:' || { echo "::error file=$f::missing '# WHY:' header on line 1"; failed=1; }
             pkgs=$(grep -cE '^package[[:space:]]' "$f")
             [ "$pkgs" -eq 1 ] || { echo "::error file=$f::expected exactly 1 package declaration, found $pkgs"; failed=1; }
-            "$RUNNER_TEMP/opa" check "$f" || { echo "::error file=$f::opa check failed"; failed=1; }
           done <<< "$changed"
+          # opa check must run per-directory: policies share helpers defined in
+          # sibling files (e.g. norm() in main.rego), so a single-file check
+          # reports spurious "undefined function" errors (ERR-017).
+          while IFS= read -r d; do
+            "$RUNNER_TEMP/opa" check "$d" || { echo "::error::opa check failed in $d"; failed=1; }
+          done <<< "$(echo "$changed" | xargs -n1 dirname | sort -u)"
           if [ "$failed" -ne 0 ]; then
             echo "::error::Policy lint failed - see annotations above."
             exit 1
