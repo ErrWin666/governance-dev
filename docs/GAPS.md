@@ -17,7 +17,7 @@
 | GAP-L1-05 | WSL/cygheap/hook crash → fail_closed locks the owner out | Proven live today: hook crash (`-1073741502`) blocked a plain `read` | Manual recovery (STATE.md §7) | YES — accept fragility or invest in watchdog |
 | ~~GAP-L1-06~~ ✅ CLOSED | gate.sh P12 env wiring + p4 `lower()` fix — committed 82874be | — | — | — |
 | GAP-L1-07 | P6/P7 exist only on ci-test + governance-dev | No governed real project yet (that is L6) | none — blocked by L6 | no |
-| GAP-L1-08 | P4 anomaly: 10:39:25 deny cited missing `evidence/p3/manifest.json` while the file existed | Current policy set verified correct via `opa eval`, but the historical deny is unexplained — possible transient mid-edit state | re-test needed to close | no |
+| ~~GAP-L1-08~~ | ~~P4 anomaly: 10:39 deny cited missing `evidence/p3/manifest.json` while file existed~~ — RESOLVED: log lines 1440-1463 show the denies were a deliberate `test_pos/neg1-3.py` vector batch (session `voltaic-viscount`, prompt bd7a5c1f) — a P12/P4 deny-test run; manifest state was transient mid-test, not drift | — | — | **closed** (evidence: logs/gate.log) |
 | GAP-L1-09 | Supply-chain dep check + obfuscated-secret detection uncovered | Documented holes (ROADMAP §6) | deferred by design | YES — when to schedule |
 
 ## L2 — Quality
