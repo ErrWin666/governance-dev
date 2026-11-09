@@ -63,6 +63,62 @@ a shared dashboard).
 - jscpd `mutants/` dir left by mutmut is excluded via `--ignore` (would otherwise read as duplication).
 - mutmut is Unix-only (fork isolation) — fine on `ubuntu-latest`; do not run locally on Windows.
 
+## Layers B + C + D (added 2026-11-09)
+
+### Layer B — `quality-gate-deep.yml` (job `quality-gate-deep`, required check)
+
+Triggers only on risky PRs (diff >200 lines OR touches `policies/`, `.github/`, `auth/`, `payments/`); always reports a check result — safe PRs pass with a skip notice.
+
+| ID | Check | Tool | Fail condition |
+|----|-------|------|----------------|
+| B1 | Dependency architecture | `import-linter` 2.16 (Py, `importlinter.ini` contracts) + `dependency-cruiser` 16 (JS, `.dependency-cruiser.js`) | contract violation / circular / unresolvable import |
+| B2 | Cognitive complexity ≤15 | radon cc (Py) — `arborist-metrics` does not exist | complexity >15 |
+| B3 | Coupling/cohesion | `polyscan` 0.6.1 npm (JS/Go/Rust/C++ only) | threshold breach; Py deferred to L2d |
+| B4 | CFG dead code | `pyscn` 1.33.2 (pip, not Go binary) | unreachable code / dead branch |
+| B5 | Mutation testing, module scope | mutmut 3.8.1 (`source_paths`=changed dirs, no `only_mutate`) | score <60% incl. `no_tests` mutants |
+| B6 | API contract, strict | api-contract-guard `--strict-additions` | ANY schema change (not just breaking) |
+
+### Layer C — advisory skills (skills.sh-first, never block)
+
+Installed via `npx skills add <repo> --skill <name> -a devin` into `.devin/skills/` (+ `skills-lock.json`):
+
+| Slot | Adopted skill | Source repo | Installs |
+|---|---|---|---|
+| C1 clean code/SOLID | `clean-code` | sickn33/agentic-awesome-skills | 12.8K |
+| C2 adversarial review | `adversarial-reviewer` | alirezarezvani/claude-skills | 853 |
+| C3 quality gate design | `quality-gate` | simota/quality-skills | — |
+| C4 code review | `code-review` | mattpocock/skills | 868K |
+| C5 logic flow | `logic-flow-review` | **custom — no skills.sh match** | — |
+| B5 guidance | `mutation-testing` | secondsky/claude-skills | 453 |
+
+Rejected: `trailofbits/skills@mutation-testing` (mewt/muton smart-contract only).
+Sample advisory outputs: `evidence/P3/code-check.md`, `evidence/P3/logic-flow.md`.
+
+### Layer D — `quality-gate-perlang.yml` (job `quality-gate-perlang`, required check)
+
+| Adapter | Trigger | Tools |
+|---|---|---|
+| D2 Python | any changed .py | ruff, radon cc≤10, import-linter, pytest --cov-fail-under=80 (if tests exist) |
+| D1 JS/TS | changed js/ts + package.json | eslint, eslint-plugin-sonarjs (cognitive ≤15), knip, dependency-cruiser, nyc --lines 80 |
+| D3 Go | changed .go + go.mod | go vet, gocyclo ≤10, gocognit ≤15, go test -coverprofile |
+| D4 | none recognized | `::warning` skip, never fails |
+
+### SonarQube — LOCAL-ONLY
+
+`sonarqube:community` recreated with `-p 9000:9000` (original had no port mapping
+and a broken /etc/hosts → ES hostname crash). UP at http://localhost:9000 (v26.9.0).
+Volumes `sonarqube_data/_extensions/_logs` preserved. **`admin` login returns 401 —
+owner-set password in the preserved volume.** S1 gate conditions, S2 custom secret
+rules, S3 S2068 all require owner credentials; S4 GitHub link is impossible anyway
+(localhost unreachable from Actions) → documented as manual/local tool.
+
+### Test evidence
+
+- Risky PR #3 (>200 lines, import cycle, cc 15+, dead code, weak tests):
+  B1 fail (cycle), B4 fail (unreachable), B5 fail, Gate FAILED → merge BLOCKED.
+  D2 also failed (ruff/radon/import-linter on seed). D4 fix verified.
+- Tools failing/limited → `docs/errors/ERR-015.md`.
+
 ## Notes for owner
 
 - `STATE.md` not touched (P4) — manual update needed: mark L2a built, note `quality-gate`
