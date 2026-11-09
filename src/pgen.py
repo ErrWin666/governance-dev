@@ -36,7 +36,7 @@ def main(argv: list[str]) -> int:
 
     alphabet = build_alphabet(args.no_symbols)
     for _ in range(args.count):
-        print(generate(args.length, alphabet))
+        sys.stdout.write(generate(args.length, alphabet) + "\n")
     return 0
 
 
