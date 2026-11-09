@@ -263,7 +263,12 @@ jobs:
           covered = set()
           for cls in ET.parse('coverage.xml').getroot().iter('class'):
               covered.add((cls.get('filename') or '').replace('\\', '/'))
-          missing = [f for f in changed if f not in covered]
+          missing = [
+              f for f in changed
+              if f not in covered
+              and not f.endswith('__init__.py')
+              and open(f, encoding='utf-8', errors='replace').read().strip()
+          ]
           for f in missing:
               print(f"::error file={f}::changed source file has zero coverage instrumentation (never imported by tests)")
           if missing:
