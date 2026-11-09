@@ -98,7 +98,7 @@
 6. Then L5 orchestration, L6 deployment (copier), spec v1.2 last
 - **Next phase**: close L3 + L2 proof gaps per docs/RECOVERY_PLAN.md;
   no L4 work until earlier-layer gaps are closed
-- Reference reads: docs/specs/GOVERNANCE_SPEC.md (v1.1),
+- Reference reads: GOVERNANCE_SPEC.md (v2.0, repo root since 2026-11-09),
   docs/plans/GOVERNANCE_BUILD_PLAN.md, approvals/approval.md (A-002)
 
 ## 6. Key files

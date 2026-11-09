@@ -53,9 +53,9 @@ Details: [STATE.md](STATE.md).
     │   ├── architecture/             ← arc42 + ADRs (start at AGENTS.md)
     │   ├── errors/                   ← ERR index (lessons learned)
     │   ├── research/                 ← landscape & prior-art notes
-    │   ├── specs/GOVERNANCE_SPEC.md      ← the constitution (v1.1)
     │   ├── plans/GOVERNANCE_BUILD_PLAN.md ← build plan
     │   └── governance-file-recovery.md
+    ├── GOVERNANCE_SPEC.md            ← the constitution (v2.0, repo root)
     ├── logs/gate.log                 ← audit trail (+ b1.0 test logs)
     ├── plan/                         ← L3 workspace (spec/tasks, pgen pilot)
     ├── policies/                     ← OPA gate + P1–P5 (.rego)
