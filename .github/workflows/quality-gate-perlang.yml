@@ -53,7 +53,9 @@ jobs:
           grep -E '\.go$' "$TMPD/pl_changed.txt" | grep -v '_test\.go$' > "$TMPD/pl_go_src.txt" || true
           known=$((py + js + go))
           total=$(wc -l < "$TMPD/pl_changed.txt")
-          [ "$known" -eq 0 ] && [ "$total" -gt 0 ] && echo "::warning::No recognized source language in diff - per-language adapters skipped"
+          if [ "$known" -eq 0 ] && [ "$total" -gt 0 ]; then
+            echo "::warning::No recognized source language in diff - per-language adapters skipped"
+          fi
 
       - name: D2 - Python adapter (ruff + radon + import-linter + coverage)
         id: d2
