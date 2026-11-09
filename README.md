@@ -8,6 +8,20 @@ self-edited governance, and unproven claims. Used by a solo owner +
 Devin agent; designed to later govern large projects (ERP, warehouse
 management).
 
+## Two things live here (read this once)
+
+This repo is both **the product** and **its own workshop** (self-hosting):
+
+- **Product** — the governance machinery L6 will stamp onto future
+  projects: `policies/` (the gate), `.github/workflows/` (CI checks),
+  `.devin/skills/` (advisory layer), `GOVERNANCE_SPEC.md` (constitution).
+- **Workshop** — the running pilot that exercises the product:
+  `plan/` + `src/` (pgen), plus the governance record
+  `evidence/` + `approvals/` + `logs/`.
+
+File-placement test: would it be copied to a fresh project? Yes → product.
+No → workshop. Anything else → does not belong in this tree.
+
 ## Status
 
 **Operational** — local gate (PreToolUse → WSL gate.sh → OPA P1–P5) and
