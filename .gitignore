@@ -6,3 +6,4 @@ backups/
 test.env
 ci-test/
 trash/
+__pycache__/

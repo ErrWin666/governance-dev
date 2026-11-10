@@ -23,6 +23,34 @@ outbound_tool if {
 	startswith(input.tool_name, "mcp__")
 }
 
+# GAP-L1-12: exec can exfiltrate via shell tools — heuristic raise-of-bar
+# (documented evasion: base64, pipes, interpreters). Read-ish requests pass —
+# P3 covers literal secrets in payload text; data-carrying forms deny.
+
+deny contains msg if {
+	input.tool_name == "exec"
+	c := concat("", [" ", lower(replace(input.tool_input.command, "\\", "/"))])
+	some t in p10_blocked_tools
+	contains(c, t)
+	msg := sprintf("P10-DATA-EXFIL: exec outbound tool%s", [t])
+}
+
+deny contains msg if {
+	input.tool_name == "exec"
+	c := concat("", [" ", lower(replace(input.tool_input.command, "\\", "/"))])
+	some u in p10_outbound
+	contains(c, u)
+	some f in p10_exfil_flags
+	contains(c, f)
+	msg := sprintf("P10-DATA-EXFIL: exec%s with data flag%s", [u, f])
+}
+
+p10_blocked_tools := {" scp ", " sftp ", " nc ", " ncat ", " netcat ", " socat ", " telnet ", " ftp ", " rsync ", " ssh "}
+
+p10_outbound := {" curl ", " wget ", " gh api"}
+
+p10_exfil_flags := {" -d ", " --data", " --form", " -f ", " -t ", " --upload-file", " --post", " --json", " -x post", " -x put", " -x patch", " -x delete", " --method", " --input", " --field"}
+
 p10_secret_patterns := {
 	"api-key-like": `(?i)(api[_-]?key|password|secret|token)\s*[:=]\s*\S{8,}`,
 	"openai": `sk-[a-zA-Z0-9]{20,}`,

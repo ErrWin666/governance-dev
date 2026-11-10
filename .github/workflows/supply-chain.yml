@@ -1,0 +1,29 @@
+# WHY: GAP-L1-09 — no dependency-vulnerability coverage anywhere.
+# osv-scanner (Google, free) covers npm/pip/go/cargo/ruby/composer.
+# Skip-by-design when no manifest exists — same pattern as perlang gate.
+name: supply-chain-scan
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  osv-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Detect dependency manifests
+        id: man
+        run: |
+          FILES=$(git ls-files | grep -E '(package-lock\.json|yarn\.lock|pnpm-lock\.yaml|requirements.*\.txt|Pipfile\.lock|go\.sum|Cargo\.lock|Gemfile\.lock|composer\.lock)$' || true)
+          echo "found=$( [ -n "$FILES" ] && echo true || echo false )" >> "$GITHUB_OUTPUT"
+          echo "$FILES"
+      - name: install + run osv-scanner
+        if: steps.man.outputs.found == 'true'
+        run: |
+          go install github.com/google/osv-scanner/cmd/osv-scanner@latest
+          osv-scanner --recursive ./
+      - name: skip note
+        if: steps.man.outputs.found != 'true'
+        run: echo "no dependency manifests — scan skipped by design"

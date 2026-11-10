@@ -23,7 +23,7 @@ command -v opa >/dev/null 2>&1 || {
 if [ -f policies/.governance/policies.lock ]; then
 	EXP=$(tr -d ' 
 ' < policies/.governance/policies.lock | tr 'A-F' 'a-f')
-	ACT=$(find policies -maxdepth 1 -type f \( -name '*.rego' -o -name 'gate.sh' \) -print0 | sort -z | xargs -0 cat | sha256sum | awk '{print $1}')
+	ACT=$(find policies -maxdepth 1 -type f \( -name '*.rego' -o -name 'gate.sh' -o -name 'exec_analyze.py' \) -print0 | sort -z | xargs -0 cat | sha256sum | awk '{print $1}')
 	if [ -n "$EXP" ] && [ "$EXP" != "$ACT" ]; then
 		printf '%s DENY POLICIES-INTEGRITY lock mismatch
 ' "$(date -Is)" >> "$GATE"
@@ -59,10 +59,18 @@ if [ -f plan/tasks.approved ] && [ -f plan/tasks.md ]; then
     fi
 fi
 
+
+# AST layer: analyze exec commands via bashlex before eval (GAP-L1-10 #3)
+EXEC_JSON='{}'
+TOOL_NAME=$(printf '%s' "$PAYLOAD" | jq -r '.tool_name // empty' 2>/dev/null)
+if [ "$TOOL_NAME" = "exec" ]; then
+	EXEC_JSON=$(printf '%s' "$PAYLOAD" | jq -r '.tool_input.command // empty' | python3 policies/exec_analyze.py 2>/dev/null || echo '{}')
+fi
+
 ENVJSON=$(jq -n --argjson inv "$INV" --argjson ft "$FT" --argjson ev "$EVP" --argjson tl "$TL" \
-	--argjson man "$MAN" --argjson cp "$CURJ" \
+	--argjson man "$MAN" --argjson cp "$CURJ" --argjson ea "$EXEC_JSON" \
 	--argjson psa "$PLAN_SPEC_APPROVED" --argjson pta "$PLAN_TASKS_APPROVED" \
-	'{env:{inventory:$inv,frozen_tests:$ft,evidence_present:$ev,tests_locked:$tl,evidence_manifests:$man,current_phase:$cp,plan_spec_approved:$psa,plan_tasks_approved:$pta}}')
+	'{env:{inventory:$inv,frozen_tests:$ft,evidence_present:$ev,tests_locked:$tl,evidence_manifests:$man,current_phase:$cp,exec_analysis:$ea,plan_spec_approved:$psa,plan_tasks_approved:$pta}}')
 
 TMP="logs/.gate-env.$$.json"
 printf '%s' "$ENVJSON" > "$TMP"
