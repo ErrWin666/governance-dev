@@ -19,13 +19,11 @@ jobs:
           FILES=$(git ls-files | grep -E '(package-lock\.json|yarn\.lock|pnpm-lock\.yaml|requirements.*\.txt|Pipfile\.lock|go\.sum|Cargo\.lock|Gemfile\.lock|composer\.lock)$' || true)
           echo "found=$( [ -n "$FILES" ] && echo true || echo false )" >> "$GITHUB_OUTPUT"
           echo "$FILES"
-      - name: osv-scanner
+      - name: install + run osv-scanner
         if: steps.man.outputs.found == 'true'
-        uses: google/osv-scanner-action@v2
-        with:
-          scan-args: |-
-            --recursive
-            ./
+        run: |
+          go install github.com/google/osv-scanner/cmd/osv-scanner@latest
+          osv-scanner --recursive ./
       - name: skip note
         if: steps.man.outputs.found != 'true'
         run: echo "no dependency manifests — scan skipped by design"
