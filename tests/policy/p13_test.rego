@@ -78,3 +78,30 @@ test_allow_git_switch if {
 test_allow_add_not_dd if {
 	p13_msgs("git add policies/x.rego") == set()
 }
+
+# --- AST layer vectors (verifier gap: tests covered fallback only) ---
+# Feed data.env.exec_analysis directly — the same shape exec_analyze.py emits.
+
+ast_env(ana) := object.union(mock_env, {"exec_analysis": ana})
+
+p13_ast_msgs(cmd, ana) := {m |
+	m := governance.deny[_] with input as {"tool_name": "exec", "tool_input": {"command": cmd}}
+		with data.env as ast_env(ana)
+	contains(m, "P13-EXEC-WRITE")
+}
+
+test_ast_deny_write_target if {
+	p13_ast_msgs("anything", {"ok": true, "commands": ["sed"], "writes": ["policies/x.rego"]}) != set()
+}
+
+test_ast_deny_blocked_cmd if {
+	p13_ast_msgs("anything", {"ok": true, "commands": ["dd"], "writes": []}) != set()
+}
+
+test_ast_allow_readonly if {
+	p13_ast_msgs("anything", {"ok": true, "commands": ["tail"], "writes": []}) == set()
+}
+
+test_ast_fallback_on_parse_fail if {
+	p13_ast_msgs("rm -rf policies/", {"ok": false}) != set()
+}
