@@ -1,0 +1,90 @@
+{
+  "role": "attacker",
+  "task": "Run real semgrep scans (p/security-audit + p/owasp-top-ten + command-injection) on the governance repo, triage findings with file:line, and check which of the 8 residual holes in l4-4-editor/OUTPUT.md semgrep independently rediscovers.",
+  "verdict": "DISPUTED",
+  "subclaims": [
+    {
+      "id": "1",
+      "claim": "semgrep p/security-audit + p/owasp-top-ten run against policies/ src/ — completed, 690 rules, 20 files, 0 findings",
+      "verdict": "VERIFIED",
+      "evidence": "handoffs/l4-5-attacker/semgrep.sarif (results:[]), rules loaded: 690"
+    },
+    {
+      "id": "2",
+      "claim": "p/bash ruleset exists and covers gate.sh",
+      "verdict": "DISPUTED",
+      "evidence": "registry 404 for p/bash; p/command-injection ran instead: 0 findings"
+    },
+    {
+      "id": "3",
+      "claim": "zero findings = clean repo",
+      "verdict": "DISPUTED",
+      "evidence": "engine validated on planted vulns (subprocess-shell-true, eval-detected both fired on scratch/sanity_check.py:3-4); 0 findings on real target while 9/20 live gate vectors still bypass — pattern SAST cannot see the policy-evasion threat model"
+    },
+    {
+      "id": "4",
+      "claim": "semgrep independently rediscovered residual holes from l4-4-editor/OUTPUT.md",
+      "verdict": "DISPUTED",
+      "evidence": "0 of 8 rediscovered — Rego is not a semgrep language (only 7 multilang rules applied to the 14 .rego files); bash coverage was 1 rule; all residual holes are logic/design flaws"
+    },
+    {
+      "id": "5",
+      "claim": "exec-write protection is complete",
+      "verdict": "DISPUTED",
+      "evidence": "9/20 replicated-gate vectors returned allow=true (poc/live-vectors.md), incl. whole-dir rm -rf policies/, $var indirection, base64 python3 -c, git -C, awk system(), curl -o, tar -C, find -delete"
+    }
+  ],
+  "findings": [
+    {
+      "severity": "critical",
+      "text": "Whole-directory removal bypass: `rm -rf policies/` allowed. normpath strips the trailing slash so the analyzer emits 'C:\\governance-dev\\policies', which fails the 'policies/' substring test in protected_hit. Same for rm -rf approvals|evidence|logs|src. Live-tested allow=true (V20).",
+      "evidence": "policies/exec_analyze.py:78, policies/p13_exec_write_paths.rego:77-81,98; poc/live-vectors.md V20"
+    },
+    {
+      "severity": "critical",
+      "text": "Plain-assignment indirection still bypasses: `T=policies/x.rego; echo y > $T` allowed — AST emits literal '$T' and layer (c) requires an indirection form plus a protected-path literal; a bare VAR= assignment supplies only the latter. The p13 header still claims 'audit + policies.lock are the detection tier' which is false (lock seals policy files only). Live-tested allow=true (V1).",
+      "evidence": "policies/exec_analyze.py:69-72, policies/p13_exec_write_paths.rego:5,59-69; poc/live-vectors.md V1"
+    },
+    {
+      "severity": "critical",
+      "text": "Layer (c) indirection rule is literal-co-occurrence only: `python3 -c` with base64/concat-obfuscated target allowed (no 'policies/' literal ever appears); awk system(), curl -o, tar -C, find -delete all allowed — absent from both WRITE_VERBS and indirection_forms. Live-tested allow=true (V3,V7,V10,V11,V13).",
+      "evidence": "policies/p13_exec_write_paths.rego:59-69, policies/exec_analyze.py:8-11; poc/live-vectors.md V3,V7,V10,V11,V13"
+    },
+    {
+      "severity": "major",
+      "text": "git argv[0]-fragile subcommand check still live: `git -C policies clean -fd` and `git -C policies checkout -- x.rego` allowed — rest[0] is '-C', never reaches GIT_WRITE_SUBS; '-C policies' also lacks the 'policies/' literal so layer (c) misses too. Live-tested allow=true (V8,V9).",
+      "evidence": "policies/exec_analyze.py:61-62, policies/p13_exec_write_paths.rego:69; poc/live-vectors.md V8-V9"
+    },
+    {
+      "severity": "major",
+      "text": "Semgrep gives false assurance on this repo: 690 rules, 0 findings, while >=9 live bypasses exist. Rego (the actual policy layer, 14 files) has zero dedicated rules — only multilang rules apply; bash coverage is 1 rule. A green semgrep run must not be treated as a security signal here.",
+      "evidence": "handoffs/l4-5-attacker/semgrep.sarif; scan status: python 194 rules/2 files, bash 1 rule/1 file, multilang 7 rules/20 files"
+    },
+    {
+      "severity": "major",
+      "text": "gate.sh hardcodes /usr/bin/jq, /usr/bin/python3, and opa under /usr/bin|/usr/local/bin|$HOME/.local/bin — none exist on this Windows host (verified: ls fails for all). If gate.sh is the live hook it fail-closes every exec (DoS); meanwhile grep/sed/ls/head/date/rm/paste/timeout remain PATH-resolved — residual PATH-poisoning surface from l4-4 finding 3 is only partially mitigated, and the $HOME/.local/bin/opa fallback is still user-writable.",
+      "evidence": "policies/gate.sh:6-8,37,39-42,81,85,94"
+    },
+    {
+      "severity": "minor",
+      "text": "Analyzer blind spots persist despite patches: no timeout on python3 exec_analyze.py (opa gets timeout 4), unbounded sys.stdin.read; find -delete uncovered; multi-call cd state invisible (single-command cd now tracked).",
+      "evidence": "policies/gate.sh:69,81, policies/exec_analyze.py:84"
+    },
+    {
+      "severity": "minor",
+      "text": "Cygwin fork nondeterminism re-observed during testing (Win32 error 299 / 0xC0000142 dofork failures) — corroborates l4-4 availability finding; fork-heavy seal/inventory pipelines remain flaky.",
+      "evidence": "policies/gate.sh:28,37"
+    },
+    {
+      "severity": "note",
+      "text": "Environment/tooling notes: semgrep is 1.175.0 not the 1.185.0 claimed in TASK.md; p/bash registry pack returns 404 (does not exist); p/command-injection ran cleanly with 0 findings; semgrep itself crashes on Windows cp1252 unless PYTHONUTF8=1 is set.",
+      "evidence": "semgrep --version; /tmp/semgrep_bash.json error 'Failed to download ... p/bash HTTP 404'; semgrep_err.log UnicodeEncodeError"
+    },
+    {
+      "severity": "note",
+      "text": "Post-l4-4 patches verified working: cd tracking, .exe stripping, MAX_DEPTH 6, <> redirect, command-substitution walk, new indirection layer (c), analyzer-crash fail-closed rule, absolute-path seal tools, startswith->contains fallback (seg_starts_protected now dead code). Live gate also denied this agent's own exec call containing attack literals — positive control.",
+      "evidence": "policies/exec_analyze.py:12,23-25,44-49,69,79-80, policies/p13_exec_write_paths.rego:50-54,56-69,100-108, policies/gate.sh:6-8,26-28,48-49,57-58"
+    }
+  ],
+  "confidence": "high"
+}

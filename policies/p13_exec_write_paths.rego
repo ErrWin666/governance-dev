@@ -77,7 +77,7 @@ blocked_commands := {"dd", "socat", "nc", "ncat", "netcat", "scp", "sftp", "rsyn
 protected_hit(t) if {
 	p := lower(replace(t, "\\", "/"))
 	some pat in protected_paths
-	contains(p, pat)
+	contains(concat("", [p, "/"]), pat)
 }
 
 segments_after_op(c) := [trim_space(p) |
