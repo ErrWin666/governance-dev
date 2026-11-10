@@ -24,8 +24,8 @@ printf '%s PWD-PROOF cwd=%s\n' "$(date -Is)" "$(pwd)" >> "$GATE"
 # (b) integrity seal: tampered policies = fail closed (GAP-L1-10, owner-sealed)
 if [ -f policies/.governance/policies.lock ]; then
 	EXP=$(tr -d ' 
-' < policies/.governance/policies.lock | tr 'A-F' 'a-f')
-	ACT=$(/usr/bin/find policies -maxdepth 1 -type f \( -name '*.rego' -o -name 'gate.sh' -o -name 'exec_analyze.py' \) -print0 | /usr/bin/sort -z | /usr/bin/xargs -0 /usr/bin/cat | /usr/bin/sha256sum | awk '{print $1}')
+' < policies/.governance/policies.lock | /usr/bin/tr 'A-F' 'a-f')
+	ACT=$(/usr/bin/find policies -maxdepth 1 -type f \( -name '*.rego' -o -name 'gate.sh' -o -name 'exec_analyze.py' \) -print0 | /usr/bin/sort -z | /usr/bin/xargs -0 /usr/bin/cat | /usr/bin/sha256sum | /usr/bin/awk '{print $1}')
 	if [ -n "$EXP" ] && [ "$EXP" != "$ACT" ]; then
 		printf '%s DENY POLICIES-INTEGRITY lock mismatch
 ' "$(date -Is)" >> "$GATE"
@@ -45,8 +45,8 @@ CURJ=null; [ -n "$CUR" ] && CURJ="\"$CUR\""
 # L3: verify approved plan files with hash match
 PLAN_SPEC_APPROVED=false
 if [ -f plan/spec.approved ] && [ -f plan/spec.md ]; then
-    EXPECTED=$(tr -d ' \r\n' < plan/spec.approved | tr 'A-F' 'a-f')
-    ACTUAL=$(sha256sum plan/spec.md 2>/dev/null | awk '{print $1}')
+    EXPECTED=$(/usr/bin/tr -d ' \r\n' < plan/spec.approved | /usr/bin/tr 'A-F' 'a-f')
+    ACTUAL=$(/usr/bin/sha256sum plan/spec.md 2>/dev/null | /usr/bin/awk '{print $1}')
     if [ -n "$EXPECTED" ] && [ "$EXPECTED" = "$ACTUAL" ]; then
         PLAN_SPEC_APPROVED=true
     fi
@@ -54,8 +54,8 @@ fi
 
 PLAN_TASKS_APPROVED=false
 if [ -f plan/tasks.approved ] && [ -f plan/tasks.md ]; then
-    EXPECTED=$(tr -d ' \r\n' < plan/tasks.approved | tr 'A-F' 'a-f')
-    ACTUAL=$(sha256sum plan/tasks.md 2>/dev/null | awk '{print $1}')
+    EXPECTED=$(/usr/bin/tr -d ' \r\n' < plan/tasks.approved | /usr/bin/tr 'A-F' 'a-f')
+    ACTUAL=$(/usr/bin/sha256sum plan/tasks.md 2>/dev/null | /usr/bin/awk '{print $1}')
     if [ -n "$EXPECTED" ] && [ "$EXPECTED" = "$ACTUAL" ]; then
         PLAN_TASKS_APPROVED=true
     fi
@@ -66,7 +66,7 @@ fi
 EXEC_JSON='{}'
 TOOL_NAME=$(printf '%s' "$PAYLOAD" | "$JQ" -r '.tool_name // empty' 2>/dev/null)
 if [ "$TOOL_NAME" = "exec" ]; then
-	EXEC_JSON=$(printf '%s' "$PAYLOAD" | "$JQ" -r '.tool_input.command // empty' | "$PY3" policies/exec_analyze.py "$ROOT_DIR" 2>/dev/null || echo '{}')
+	EXEC_JSON=$(printf '%s' "$PAYLOAD" | "$JQ" -r '.tool_input.command // empty' | "$PY3" policies/exec_analyze.py "$ROOT_DIR" 2>/dev/null || echo '{"ok":false,"crashed":true}')
 fi
 
 ENVJSON=$("$JQ" -n --argjson inv "$INV" --argjson ft "$FT" --argjson ev "$EVP" --argjson tl "$TL" \

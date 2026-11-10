@@ -9,7 +9,7 @@ WRITE_VERBS = {"rm", "cp", "mv", "install", "dd", "tee", "truncate",
                "touch", "patch", "nano", "vim", "vi", "code", "sed"}
 ROOT = sys.argv[1] if len(sys.argv) > 1 else os.getcwd()
 GIT_WRITE_SUBS = {"checkout", "restore", "apply", "clean", "am", "reset", "commit-tree"}
-MAX_DEPTH = 3
+MAX_DEPTH = 6
 
 def walk(node, depth=0):
     """Iterate all AST nodes including nested command subs."""
@@ -20,6 +20,9 @@ def walk(node, depth=0):
         yield from walk(part, depth + 1)
     for sub in getattr(node, "list", []) or []:
         yield from walk(sub, depth + 1)
+    for cs in [getattr(node, "command", None)]:
+        if cs is not None and cs is not node:
+            yield from walk(cs, depth + 1)
 
 def words_of(node):
     return [p.word for p in getattr(node, "parts", [])
@@ -38,6 +41,8 @@ def analyze(text, depth=0):
                 if not ws:
                     continue
                 verb = os.path.basename(ws[0])
+                if verb.endswith(".exe"):
+                    verb = verb[:-4]
                 cmds.append(verb)
                 rest = ws[1:]
                 if verb == "cd" and rest:
@@ -55,9 +60,13 @@ def analyze(text, depth=0):
                         writes.add(w)
                 elif verb == "git" and rest and rest[0] in GIT_WRITE_SUBS:
                     writes |= {w for w in rest[1:] if not w.startswith("-")}
-                elif verb in WRITE_VERBS - {"sed"}:
+                elif verb in {"cp", "mv"}:
+                    nf = [w for w in rest if not w.startswith("-")]
+                    if nf:
+                        writes.add(nf[-1])
+                elif verb in WRITE_VERBS - {"sed", "cp", "mv"}:
                     writes |= {w for w in rest if not w.startswith("-")}
-            elif n.kind == "redirect" and n.type in {">", ">>", "&>"}:
+            elif n.kind == "redirect" and n.type in {">", ">>", "&>", "<>"}:
                 out = getattr(n, "output", None)
                 if out and getattr(out, "kind", "") == "word":
                     writes.add(out.word)

@@ -41,10 +41,17 @@ deny contains msg if {
 	not analysis_ok
 	c := concat("", [" ", lower(replace(input.tool_input.command, "\\", "/"))])
 	some seg in segments_after_redirect(c)
-	seg_starts_protected(seg)
+	seg_contains_protected(seg)
 	msg := sprintf("P13-EXEC-WRITE: exec redirect to protected path: %s", [input.tool_input.command])
 }
 
+
+
+deny contains msg if {
+	input.tool_name == "exec"
+	data.env.exec_analysis.crashed == true
+	msg := "P13-ANALYZER-DOWN: exec analysis crashed — fail closed"
+}
 
 # (c) indirection: interpreters/subshells/git-flags + protected-path mention.
 # Proven bypasses (l4-4 attacker poc/): python -c, $(), xargs, find -exec,
@@ -59,7 +66,7 @@ deny contains msg if {
 	msg := sprintf("P13-EXEC-INDIRECTION: exec writes protected path via%s", [t])
 }
 
-indirection_forms := {"python3 -c", "python -c", "node -e", "perl -e", "ruby -e", "php -r", "eval ", " base64 ", " xargs ", " -exec ", " ln -s", "| sh", "| bash", "checkout-index", "reset --hard", "$(", " | python", " | node "}
+indirection_forms := {"python3 -c", "python -c", "node -e", "perl -e", "ruby -e", "php -r", "eval ", " base64 ", " xargs ", " -exec ", " ln -s", "| sh", "| bash", "checkout-index", "reset --hard", "$(", " | python", " | node ", " env "}
 
 analysis_ok if {
 	data.env.exec_analysis.ok == true
