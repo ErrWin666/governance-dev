@@ -338,6 +338,19 @@ jobs:
           echo "review cycles (commits on this PR): $COUNT"
           if [ "$COUNT" -gt 3 ]; then echo "::warning::PR reached $COUNT cycles — rule 30 health signal; rule 29: escalate to owner instead of round 4"; fi
 
+      - name: A10 - Phase contract requires size (rule 19)
+        if: always()
+        run: |
+          TMPD="${RUNNER_TEMP:-/tmp}"
+          failed=0
+          for f in $(grep -E '^plan/phase-.*\.md$' "$TMPD/qg_changed.txt" 2>/dev/null); do
+            if ! grep -q 'size:' "$f" 2>/dev/null; then
+              echo "::error file=$f::phase contract missing 'size:' field (rule 19)"; failed=1
+            fi
+          done
+          [ "$failed" -ne 0 ] && exit 1
+          echo "A10 passed"
+
       - name: Gate summary
         if: always()
         env:
