@@ -64,6 +64,8 @@ jobs:
               failed = True
               print(f"::error file={path},line={max(1,line)}::{msg}")
 
+          MAX_CLASS = 300
+
           def check_py_funcs(path):
               try:
                   tree = ast.parse(open(path, encoding='utf-8', errors='replace').read())
@@ -74,6 +76,10 @@ jobs:
                       span = node.end_lineno - node.lineno + 1
                       if span > MAX_FUNC:
                           err(path, node.lineno, f"function '{node.name}' is {span} lines (max {MAX_FUNC})")
+                  elif isinstance(node, ast.ClassDef):
+                      span = node.end_lineno - node.lineno + 1
+                      if span > MAX_CLASS:
+                          err(path, node.lineno, f"class '{node.name}' is {span} lines (max {MAX_CLASS}; spec rule 5)")
 
           def check_brace_funcs(path):
               lines = open(path, encoding='utf-8', errors='replace').read().splitlines()
@@ -323,6 +329,14 @@ jobs:
             exit 1
           fi
           echo "A8 passed: no debug leftovers or silenced errors"
+
+      - name: A9 - Review-cycle counter (rules 29/30)
+        if: always()
+        run: |
+          BASE_SHA="${{ github.event.pull_request.base.sha }}"
+          COUNT=$(git rev-list --count "${BASE_SHA}..HEAD" 2>/dev/null || echo 0)
+          echo "review cycles (commits on this PR): $COUNT"
+          if [ "$COUNT" -gt 3 ]; then echo "::warning::PR reached $COUNT cycles — rule 30 health signal; rule 29: escalate to owner instead of round 4"; fi
 
       - name: Gate summary
         if: always()

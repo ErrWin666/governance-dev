@@ -67,6 +67,9 @@ jobs:
           python3 -m pip install --quiet ruff 'radon==6.0.1'
           echo "--- ruff"
           [ -n "$PY_SRC" ] && ruff check $PY_SRC || echo "only test/config py files changed"
+          echo "--- vulture (dead code, advisory)"
+          python3 -m pip install --quiet 'vulture==2.11'
+          [ -n "$PY_SRC" ] && vulture $PY_SRC --min-confidence 80 || echo "::notice::vulture skipped — no py src changed"
           for f in $PY_SRC; do
             radon cc -s -j "$f" > "$TMPD/radon.json" 2>/dev/null || continue
             python3 - "$f" "$TMPD/radon.json" <<'PY'
