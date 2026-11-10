@@ -18,6 +18,12 @@
 | ~~GAP-L1-06~~ ✅ CLOSED | gate.sh P12 env wiring + p4 `lower()` fix — committed 82874be | — | — | — |
 | GAP-L1-07 | P6/P7 exist only on ci-test + governance-dev | No governed real project yet (that is L6) | none — blocked by L6 | no |
 | ~~GAP-L1-08~~ | ~~P4 anomaly: 10:39 deny cited missing `evidence/p3/manifest.json` while file existed~~ — RESOLVED: log lines 1440-1463 show the denies were a deliberate `test_pos/neg1-3.py` vector batch (session `voltaic-viscount`, prompt bd7a5c1f) — a P12/P4 deny-test run; manifest state was transient mid-test, not drift | — | — | **closed** (evidence: logs/gate.log) |
+| GAP-L2-14 | review-cycle counter (rules 29/30) — was zero | shipped: A9 counts PR commits, >3 → ::warning advisory; full enforcement needs L4 roles (PR #8) | closed (advisory) | no |
+| GAP-L2-15 | class-size half of rule 5 unenforced | shipped: A1 ClassDef check ≤300 for .py; JS class sizing deferred (needs AST parser) | closed | no |
+| GAP-L2-16 | dep-cruiser config absent → step skipped | shipped: .dependency-cruiser.js with no-circular error rule (PR #8) | closed | no |
+| GAP-L2-17 | dead-code rule unenforced | shipped: vulture advisory step in D2 (PR #8) | closed (advisory) | no |
+| GAP-L2-18 | naming-consistency rule unenforced | needs per-language convention config on a real project | DEFERRED to L6/first governed project | yes |
+| GAP-L2-19 | process circular-deps + deadlock + non-converging loops (rules 28/29 process half) | no reviewer/implementer roles exist to run a loop | DEFERRED — blocked by L4/L5; A9 gives early signal only | yes |
 | GAP-L1-09 | Supply-chain dep check + obfuscated-secret detection uncovered | Documented holes (ROADMAP §6) | deferred by design | YES — when to schedule |
 
 ## L2 — Quality
