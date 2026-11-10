@@ -30,3 +30,7 @@ Owner: approved in-session, 2026-11-10 (text approval — per ERR-001 interim me
 | A-008 | 2026-11-10 | DEFERRED: L3 residual — L3 sealed | L3-05 spec-writer unproven: DEFERRED — proof point = the L4 spec itself (written via the skill + verified).<br>X-03 A-001 record, X-04 runbook: DEFERRED to L4 governance-docs pass.<br>X-05 workflow-guard advisory: ACCEPTED (advisory by design).<br>L3-08 seal-forgery: CLOSED via P14 (PR #10). L3-04 resume: CLOSED (passed). |
 
 Owner: approved in-session, 2026-11-10 (text approval — per ERR-001 interim mechanism)
+
+| A-009 | 2026-11-10 | ACKNOWLEDGED: L4.4+L4.5 adversarial reviews | Verifier/Skeptic/Attacker all DISPUTED exec-gate completeness — 15+9 holes found, criticals fixed (9b29641, 9a30751); documented residuals are clause-18 detection-tier. Armed attacker proved SAST (semgrep, 690 rules) misses logic holes the agent found. |
+
+Owner: approved in-session, 2026-11-10 (text approval — per ERR-001 interim mechanism)
