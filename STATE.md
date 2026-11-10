@@ -2,8 +2,14 @@
 
 > Purpose: "Where are we now?" — for any new session to resume in 2 minutes.
 
-**Last updated**: 2026-11-09
-**Status**: Operational — CI enforcement proven on ci-test repo
+**Last updated**: 2026-11-10
+**Status**: L1+L2 sealed (A-004..A-006). L3 bootstrap shipped; cold-resume PASSED.
+
+## Session 2026-11-10
+- Merged: PRs #6-9 (p13 AST, P10 exec-exfil, osv-scanner, A9/A10, dep-cruiser, vulture)
+- L3: phase-contract template + coordination-log + knowledge/index + A10 CI
+- config/governance.yaml (rule 22); cold-resume test PASSED — found drift, all fixed
+- Next: L3 seal note, then L4
 
 ## 1. What is built and working
 - Local gate: PreToolUse hook → WSL gate.sh → OPA (P1-P5)

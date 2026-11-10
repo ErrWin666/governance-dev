@@ -24,6 +24,8 @@
 | GAP-L2-17 | dead-code rule unenforced | shipped: vulture advisory step in D2 (PR #8) | closed (advisory) | no |
 | GAP-L2-18 | naming-consistency rule unenforced | needs per-language convention config on a real project | DEFERRED to L6/first governed project | yes |
 | GAP-L2-19 | process circular-deps + deadlock + non-converging loops (rules 28/29 process half) | no reviewer/implementer roles exist to run a loop | DEFERRED — blocked by L4/L5; A9 gives early signal only | yes |
+| ~~GAP-L3-04~~ | cold-resume never fully tested — RESOLVED: fresh session rebuilt state + found 6 drift items (stale seals, tasks.md, current_phase, STATE.md, debris, GAPS lag) | — | — | **closed — PASSED with findings** |
+| GAP-L3-08 | **write/edit tools can write `plan/*.approved`** — p13 blocks exec redirects to `.approved` but the write tool has no equivalent rule → seal forgery possible via write/edit | seals are approval artifacts | new rule matching `.approved` for write/edit/notebook_edit (keep interim mechanism: only owner-marked sessions may write) | yes — new L3 finding |
 | GAP-L1-09 | Supply-chain dep check + obfuscated-secret detection uncovered | Documented holes (ROADMAP §6) | deferred by design | YES — when to schedule |
 
 ## L2 — Quality
