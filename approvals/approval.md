@@ -17,3 +17,7 @@ Owner: approved in-session, 2026-11-10 (text approval — per ERR-001 interim me
 | A-005 | 2026-11-10 | ACCEPTED/DEFERRED: L2 residual — L2 sealed | D1 JS: DEFERRED — no package.json; activates on first governed JS project.<br>D3 Go: DEFERRED — same.<br>SonarQube local: DECLARED DORMANT — SonarCloud advisory already runs.<br>L2-13 Python dep contracts: DEFERRED — needs real package (L6).<br>L2-18 naming: DEFERRED — per-language config on real project.<br>L2-19 process cycles/deadlock: DEFERRED — blocked by L4/L5; A9 gives early signal. |
 
 Owner: approved in-session, 2026-11-10 (text approval — per ERR-001 interim mechanism)
+
+| A-006 | 2026-11-10 | RESOLVED: SonarQube local superseded | SonarCloud runs on every PR (advisory, evidence: PRs #6/#7/#8) — local SonarQube installation declared unnecessary. No credentials stored. |
+
+Owner: approved in-session, 2026-11-10 (text approval — per ERR-001 interim mechanism)
