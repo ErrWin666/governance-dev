@@ -1,0 +1,50 @@
+{
+  "role": "editor",
+  "task": "Write the final report on the exec-write protection review from the three role verdicts (verifier, skeptic, attacker + poc/) only — verdict summary, merged deduped holes, proven-working list, evidence-derived fix order",
+  "verdict": "VERIFIED",
+  "subclaims": [
+    {
+      "id": "1-role-summary",
+      "verdict": "VERIFIED",
+      "evidence": "OUTPUT.md section 1 — all three roles DISPUTED: handoffs/l4-4-verifier/verdict.json:4, handoffs/l4-4-skeptic/verdict.json:4, handoffs/l4-4-attacker/verdict.json:5,32"
+    },
+    {
+      "id": "2-confirmed-holes",
+      "verdict": "VERIFIED",
+      "evidence": "OUTPUT.md section 2 — 15 merged/deduped holes severity-ordered (4 critical, 6 major, 5 minor/note); each carries role-verdict location + underlying file:line: p13_exec_write_paths.rego:5,29-50,54-61,68-73,75,82-85; exec_analyze.py:2-3,6,8-11,15-21,35-61,64; gate.sh:5,16,23-40,66-68,79; p14_deny_seal_forgery.rego:10; p4_governance_self_protection.rego:11-13,32-36,46-48; p5_deny_unrecognized_tool.rego:14-22; p4_require_evidence.rego:44-53"
+    },
+    {
+      "id": "3-proven-working",
+      "verdict": "VERIFIED",
+      "evidence": "OUTPUT.md section 3 — verifier subclaims b/c/d (verdict.json:12-30) + attacker poc/BLOCKED-vectors.md:3-19"
+    },
+    {
+      "id": "4-fix-order",
+      "verdict": "VERIFIED",
+      "evidence": "OUTPUT.md section 4 — each item derived from findings' stated root causes and poc fix directions: poc/FINDINGS-meta.md F1-F6, poc/v1/v3/v5/v6b/v7/v8 fix-direction lines, verifier verdict.json finding[0] root cause"
+    }
+  ],
+  "findings": [
+    {
+      "severity": "note",
+      "text": "Zero unsupported claims: every claim in the three verdicts carries file:line evidence or a poc/ file pointer; OUTPUT.md adds no technical claims beyond the bundle.",
+      "evidence": "handoffs/l4-4-verifier/verdict.json, handoffs/l4-4-skeptic/verdict.json, handoffs/l4-4-attacker/verdict.json + poc/*.md"
+    },
+    {
+      "severity": "note",
+      "text": "Runtime results (gate rc=0, deny=[], hash match, 27/27 tests) are attested inside the role verdicts/poc files and were not independently re-executed by this role — tracing is to the evidence files per contract.",
+      "evidence": "handoffs/l4-4-attacker/poc/*.md; handoffs/l4-4-verifier/verdict.json:10,16,22,28"
+    },
+    {
+      "severity": "note",
+      "text": "Minor cross-role nuance reconciled in OUTPUT.md hole #15: skeptic records subdir .rego injection as a non-finding (denies only tighten, env overlap fails closed: p4_governance_self_protection.rego:11-13) while attacker records the dev-exception write path as a seal-break DoS/re-seal surface (p4:32-36) — compatible statements, reported as note severity.",
+      "evidence": "handoffs/l4-4-skeptic/verdict.json:26; handoffs/l4-4-attacker/verdict.json:29"
+    },
+    {
+      "severity": "note",
+      "text": "bashlex availability is environment-fragile and reported inconsistently across roles (absent per verifier; absent-then-present per attacker/skeptic) — OUTPUT.md reports both states as exploitable rather than resolving the discrepancy by fiat.",
+      "evidence": "handoffs/l4-4-verifier/verdict.json:34; handoffs/l4-4-attacker/poc/BLOCKED-vectors.md:16-19; handoffs/l4-4-skeptic/verdict.json:24"
+    }
+  ],
+  "confidence": "high"
+}

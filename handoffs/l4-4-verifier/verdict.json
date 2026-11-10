@@ -1,0 +1,54 @@
+{
+  "role": "verifier",
+  "task": "Verify claim: exec-write protection for protected paths is complete and correct — p13 AST layer (exec_analyze.py) + string fallback + policies.lock integrity seal + P14 seal-forgery rule + 27/27 tests.",
+  "verdict": "DISPUTED",
+  "subclaims": [
+    {
+      "id": "a",
+      "claim": "protected-path writes denied both layers",
+      "verdict": "DISPUTED",
+      "evidence": "AST layer exists and denies via contains(): policies/p13_exec_write_paths.rego:11-18,54-58. String fallback exists: p13_exec_write_paths.rego:30-46. BUT fallback redirect check uses startswith() only (p13_exec_write_paths.rego:82-85,68-73), so nested/prefixed protected targets escape: `opa eval` with no exec_analysis returned deny=[] for 'echo forged > ./policies/x.rego' and 'echo forged > plan/tasks.approved' (verified empirically, opa 1.22.2). Fallback only denies when bashlex-produced analysis is absent AND target literally begins with a protected prefix."
+    },
+    {
+      "id": "b",
+      "claim": ".approved denied for write/edit/notebook_edit AND exec",
+      "verdict": "DISPUTED",
+      "evidence": "write/edit/notebook_edit: policies/p14_deny_seal_forgery.rego:9-14 (endswith .approved via seal_target, lines 16-22); tests pass (tests/policy/p14_test.rego:19-35). exec: '.approved' is in protected_paths (p13_exec_write_paths.rego:75) and is denied via AST writes contains() (p13:54-58) and via op-segment contains() (p13:77-80, e.g. cp/tee/sed -i). BUT 'echo forged > plan/tasks.approved' in fallback mode → deny=[] (empirical opa eval): redirect fallback is startswith-only (p13:82-85) and p14 does not cover exec (p14:10). Seal forgery by exec redirect is live whenever the AST layer is unavailable."
+    },
+    {
+      "id": "c",
+      "claim": "tests cover AST AND fallback",
+      "verdict": "VERIFIED",
+      "evidence": "Fallback vectors: tests/policy/p13_test.rego:30-79. AST vectors via ast_env()/p13_ast_msgs mock of data.env.exec_analysis: p13_test.rego:85-107 (deny write-target :93-95, deny blocked cmd :97-99, allow readonly :101-103, fallback-on-parse-fail :105-107). `opa test policies/ tests/policy/` → PASS: 27/27 (p10_test.rego 7 tests + p13_test.rego 16 + p14_test.rego 4). No test exercises the fallback redirect-startswith hole for nested .approved or ./-prefixed paths."
+    },
+    {
+      "id": "d",
+      "claim": "lock covers all policy inputs incl. exec_analyze.py",
+      "verdict": "VERIFIED",
+      "evidence": "gate.sh:26 hashes policies/*.rego + gate.sh + exec_analyze.py (-maxdepth 1); compare+fail-closed at gate.sh:27-32. Recomputed hash == policies/.governance/policies.lock (99593700...9c64) — LOCK-OK. Note: -maxdepth 1 excludes policies/.governance/* (tool-inventory.txt consumed at gate.sh:35, current_phase at gate.sh:40, policies.lock itself) — these gate inputs are unsealed, though write/edit access is separately denied by p4_governance_self_protection.rego:46-48 and exec writes by the 'policies/' contains() match."
+    }
+  ],
+  "findings": [
+    {
+      "severity": "critical",
+      "text": "Live seal-forgery / policy-write bypass in the deployed configuration: AST layer is inert because bashlex is not installed in this environment (python3 -c 'import bashlex' → ModuleNotFoundError), so exec_analyze.py fails and gate.sh:67 '|| echo {}' silently drops to the string fallback. In fallback mode, exec redirects to nested or ./-prefixed protected paths are allowed: empirical opa eval returned deny=[] for 'echo forged > plan/tasks.approved' and 'echo forged > ./policies/x.rego'. Root cause: seg_starts_protected uses startswith() where the ops-path and AST-path use contains().",
+      "evidence": "policies/p13_exec_write_paths.rego:82-85 (startswith), :68-73 (redirect segs), gate.sh:66-68 (silent {} on analyzer failure), policies/exec_analyze.py:6 (import bashlex), policies/p14_deny_seal_forgery.rego:10 (exec not covered)"
+    },
+    {
+      "severity": "major",
+      "text": "Claim 'complete and correct' is overclaimed even with a working AST layer: fallback op list omits writers the AST covers ('vi' in WRITE_VERBS exec_analyze.py:8-9 vs missing from ops p13:61; git am/reset/commit-tree exec_analyze.py:10 vs only checkout/restore/apply/clean p13:61), and op-free writers (python -c, perl -pi, $var/eval indirection) are admitted unsealed at p13:4-5 with audit+lock as detection tier — i.e., prevention is knowingly partial.",
+      "evidence": "policies/exec_analyze.py:8-10, policies/p13_exec_write_paths.rego:4-5,61"
+    },
+    {
+      "severity": "note",
+      "text": "policies.lock seal is correct and currently valid (recomputed sha256 matches policies/.governance/policies.lock), and covers exec_analyze.py + gate.sh + all top-level .rego. Unsealed inputs: policies/.governance/tool-inventory.txt (gate.sh:35), policies/.governance/current_phase (gate.sh:40), tests.lock (gate.sh:37); also -maxdepth 1 would miss a .rego injected into a policies/ subdirectory (which opa --data policies/ would load recursively).",
+      "evidence": "policies/gate.sh:23-33,35,37,40, policies/.governance/policies.lock:1"
+    },
+    {
+      "severity": "note",
+      "text": "P13-EXEC-WRITE deny messages do not distinguish which layer fired (AST vs fallback), complicating audit attribution; analyzer degradation emits no gate.log entry (only '{}' substitution), so a silently dead AST layer is undetectable from logs.",
+      "evidence": "policies/p13_exec_write_paths.rego:17,26,36,45, policies/gate.sh:66-68"
+    }
+  ],
+  "confidence": "high"
+}

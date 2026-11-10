@@ -45,6 +45,22 @@ deny contains msg if {
 	msg := sprintf("P13-EXEC-WRITE: exec redirect to protected path: %s", [input.tool_input.command])
 }
 
+
+# (c) indirection: interpreters/subshells/git-flags + protected-path mention.
+# Proven bypasses (l4-4 attacker poc/): python -c, $(), xargs, find -exec,
+# base64|sh, ln -s, git checkout-index/reset --hard. Residual documented.
+deny contains msg if {
+	input.tool_name == "exec"
+	c := concat("", [" ", lower(replace(input.tool_input.command, "\\", "/"))])
+	some t in indirection_forms
+	contains(c, t)
+	some p in protected_paths
+	contains(c, p)
+	msg := sprintf("P13-EXEC-INDIRECTION: exec writes protected path via%s", [t])
+}
+
+indirection_forms := {"python3 -c", "python -c", "node -e", "perl -e", "ruby -e", "php -r", "eval ", " base64 ", " xargs ", " -exec ", " ln -s", "| sh", "| bash", "checkout-index", "reset --hard", "$(", " | python", " | node "}
+
 analysis_ok if {
 	data.env.exec_analysis.ok == true
 }

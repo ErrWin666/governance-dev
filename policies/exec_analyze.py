@@ -7,6 +7,7 @@ import bashlex
 
 WRITE_VERBS = {"rm", "cp", "mv", "install", "dd", "tee", "truncate",
                "touch", "patch", "nano", "vim", "vi", "code", "sed"}
+ROOT = sys.argv[1] if len(sys.argv) > 1 else os.getcwd()
 GIT_WRITE_SUBS = {"checkout", "restore", "apply", "clean", "am", "reset", "commit-tree"}
 MAX_DEPTH = 3
 
@@ -25,7 +26,7 @@ def words_of(node):
             if getattr(p, "kind", "") == "word"]
 
 def analyze(text, depth=0):
-    cmds, writes = [], set()
+    cmds, writes, cds = [], set(), []
     try:
         trees = bashlex.parse(text)
     except Exception:
@@ -39,6 +40,8 @@ def analyze(text, depth=0):
                 verb = os.path.basename(ws[0])
                 cmds.append(verb)
                 rest = ws[1:]
+                if verb == "cd" and rest:
+                    cds.append(rest[0])
                 if verb in {"bash", "sh", "wsl"} and "-c" in rest and depth < MAX_DEPTH:
                     i = rest.index("-c")
                     if i + 1 < len(rest):
@@ -58,7 +61,15 @@ def analyze(text, depth=0):
                 out = getattr(n, "output", None)
                 if out and getattr(out, "kind", "") == "word":
                     writes.add(out.word)
-    return cmds, writes
+    out = set()
+    for w in writes:
+        if os.path.isabs(w):
+            out.add(w)
+        else:
+            out.add(os.path.normpath(os.path.join(ROOT, w)))
+            for cd in cds:
+                out.add(os.path.normpath(os.path.join(ROOT, cd, w)))
+    return cmds, out
 
 try:
     text = sys.stdin.read()
