@@ -1,0 +1,45 @@
+# WHY: rule 22 — tunable values belong in ONE central module.
+# Declarative source of truth for gate/policy thresholds. The CI steps
+# still carry inline numbers today; wiring them to read this file is an
+# L6 refactor (template renders from here). Secrets NEVER go in this file —
+# CI secrets live in GitHub Secrets, local ones in env vars (rule 4).
+
+limits:
+  function_lines: 40        # rule 6 — A1
+  class_lines: 300          # rule 5 — A1 (ClassDef)
+  file_lines: 400           # A1
+  rego_lines: 100           # A1 (per-policy compactness)
+
+coverage:
+  line_min: 80              # rule 8 — A6 / D2 --cov-fail-under
+  mutation_min: 60          # A5 diff-scoped mutmut
+  duplication_threshold: 5  # A7 jscpd %
+  jscpd_min_tokens: 50
+
+review:
+  max_cycles: 3             # rules 29/30 — A9 warns past this
+  escalate_after: 3         # rule 29 — identical failed rounds → owner
+
+protected_paths:            # p13 exec-write + P4 self-protection
+  - policies/
+  - approvals/
+  - evidence/
+  - logs/
+  - src/
+  - state.md
+  - tests.lock
+  - .approved
+  - appdata/roaming/devin/
+
+exec:
+  blocked_tools:            # P10 exec-exfil — always deny
+    [scp, sftp, nc, ncat, netcat, socat, telnet, ftp, rsync, ssh]
+  outbound_tools:           # deny only with data-carrying flags
+    [curl, wget, "gh api"]
+
+scanners:
+  secrets: gitleaks         # .gitleaks.toml — custom ruleset (ERR-013)
+  deps: osv-scanner         # supply-chain.yml — skip-by-design w/o manifests
+  sonar: sonarcloud         # A-006 — local SonarQube declared unnecessary
+  dead_code: vulture        # D2 advisory, min-confidence 80
+  dep_graph: dependency-cruiser  # .dependency-cruiser.js — no-circular error
