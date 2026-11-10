@@ -21,3 +21,12 @@ Owner: approved in-session, 2026-11-10 (text approval — per ERR-001 interim me
 | A-006 | 2026-11-10 | RESOLVED: SonarQube local superseded | SonarCloud runs on every PR (advisory, evidence: PRs #6/#7/#8) — local SonarQube installation declared unnecessary. No credentials stored. |
 
 Owner: approved in-session, 2026-11-10 (text approval — per ERR-001 interim mechanism)
+
+| A-007 | 2026-11-10 | RATIFIED: current_phase=B6 + resume-test verdict | Owner set current_phase B6 (post-B5 pilot, pre-L6 decision). Cold-resume test PASSED — drift items fixed same day; L3-08 seal-forgery logged as open gap. |
+
+Owner: approved in-session, 2026-11-10 (text approval — per ERR-001 interim mechanism)
+
+
+| A-008 | 2026-11-10 | DEFERRED: L3 residual — L3 sealed | L3-05 spec-writer unproven: DEFERRED — proof point = the L4 spec itself (written via the skill + verified).<br>X-03 A-001 record, X-04 runbook: DEFERRED to L4 governance-docs pass.<br>X-05 workflow-guard advisory: ACCEPTED (advisory by design).<br>L3-08 seal-forgery: CLOSED via P14 (PR #10). L3-04 resume: CLOSED (passed). |
+
+Owner: approved in-session, 2026-11-10 (text approval — per ERR-001 interim mechanism)
