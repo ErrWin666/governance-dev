@@ -1,0 +1,30 @@
+{
+  "role": "verifier",
+  "claim": "Policy `policies/p13_exec_write_paths.rego` blocks exec commands that write to protected paths (policies/, approvals/, evidence/, logs/, src/, *.approved) — via an AST layer (`policies/exec_analyze.py`) with a string fallback — and does NOT false-positive on benign read-only commands.",
+  "verdict": "VERIFIED",
+  "subclaims": [
+    {
+      "id": "a",
+      "verdict": "VERIFIED",
+      "evidence": "policies/p13_exec_write_paths.rego:11-18 (AST deny on ana.writes), :20-27 (AST deny on blocked commands), :30-46 (string-fallback denies), :75 (protected_paths incl. policies/, approvals/, evidence/, logs/, src/, .approved); policies/exec_analyze.py:27-61,69 (bashlex AST emits writes/commands); policies/gate.sh:67,73 (injects data.env.exec_analysis); logs/gate.log:2021,2100 (live AST denies: 'exec writes to policies/y.rego', 'exec writes to plan/spec.approved')"
+    },
+    {
+      "id": "b",
+      "verdict": "VERIFIED",
+      "evidence": "tests/policy/p13_test.rego:52-79 (7 allow vectors); `opa test policies/ tests/policy/` => 23/23 PASS incl. all p13 allows; opa eval on the exact commands denied at logs/gate.log:1918,1921 now returns empty deny set — historical fallback FPs remediated and locked as regression tests"
+    },
+    {
+      "id": "c",
+      "verdict": "VERIFIED",
+      "evidence": "tests/policy/p13_test.rego:30-48 (5 deny tests) and :52-79 (7 allow tests) both present and passing; :22-26 mock_env exercises the fallback layer (no exec_analysis key)"
+    }
+  ],
+  "findings": [
+    "Two-layer design confirmed: AST layer (rego:11-27) consumes data.env.exec_analysis produced by policies/exec_analyze.py (bashlex parse, WRITE_VERBS/git-subcommand/redirect extraction, exec_analyze.py:8-10,57-60); fallback layer (rego:30-46) fires when analysis absent/failed (analysis_ok, rego:48-50).",
+    "Runtime proof in logs/gate.log: AST-layer denies at :2021 ('exec writes to policies/y.rego') and :2100 ('exec writes to plan/spec.approved', 'plan/tasks.approved' — *.approved protection works); earlier fallback denies at :1882,:1896,:1899,:1904-:1916,:1967,:2003.",
+    "Caveat: gate.log documents real historical false positives under the fallback layer — :1918 denied read-only `wsl -e bash -c \"cd /mnt/c/governance-dev && tail -4 logs/gate.log\"` and :1921 denied `cat`/`find`/`ls`. Verified via opa eval that the CURRENT policy returns empty deny for those exact commands; they are now encoded as passing allow tests (p13_test.rego:52,68). Claim holds for the current policy revision.",
+    "Tests exercise only the fallback path (mock_env lacks exec_analysis); AST-layer coverage rests on production log evidence, not unit tests. Fallback deny messages in tests match P13-EXEC-WRITE prefix via p13_msgs helper (p13_test.rego:22-26).",
+    "Header of p13 (rego:1-5) honestly discloses residual gaps: neither layer seals $var/eval/script evasion — detection tier is audit + policies.lock. Claim does not assert completeness against evasion, so this does not dispute it."
+  ],
+  "confidence": "high"
+}
