@@ -103,7 +103,7 @@ jobs:
             exit 0
           fi
           failed=0
-          npm ci --ignore-scripts --no-audit --no-fund || exit 1
+          if [ -f package-lock.json ]; then npm ci --ignore-scripts --no-audit --no-fund; else npm install --ignore-scripts --no-audit --no-fund; fi
           if grep -q '"eslint"' package.json; then
             npx eslint . || failed=1
           else
