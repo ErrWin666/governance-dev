@@ -9,3 +9,4 @@
 | k-002 | agent orchestration frameworks | العزل البنيوي موجود في 3 أطر فقط؛ shared-thread يستبعد نفسه | 2026-11-10 | k-002-agent-orchestration-frameworks.md |
 | k-003 | verifier/skeptic/attacker tools | SARIF + verdict.json كنمط حكم؛ mutation = إجابة Clever Hans؛ PoVs أقوى إثبات | 2026-11-10 | k-003-verifier-skeptic-attacker-tools.md |
 | k-004 | isolation + handoff protocols | TASK.md/SESSION.md + digest sidecar أقرب بروتوكول؛ tool-scoping ميكانيكي موجود | 2026-11-10 | k-004-isolation-handoff-protocols.md |
+| k-005 | MCP servers for the 8 roles | تبنّي 7: github-mcp, semgrep mcp, playwright, memory, seq-thinking, supply-chain, exa/firecrawl/fetch | 2026-11-10 | k-005-mcp-servers-research.md |

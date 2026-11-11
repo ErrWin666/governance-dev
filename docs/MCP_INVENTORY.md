@@ -27,13 +27,20 @@ Date: 2026-11-10 · Status: D-item · Source: live session tool registry
 | implementer | all file/exec tools | github-mcp |
 | supervisor | run_subagent | orchestration MCP (L5 scope) |
 
-## Gaps a new MCP would fill (research targets)
+## Gaps — resolved by K-005 research
 
-1. **Vuln-DB MCP** (OSV/NVD/GHSA unified) — attacker+skeptic cite real CVEs in verdict.json
-2. **Semgrep MCP** — attacker runs SAST inside role context (now: CLI only)
-3. **GitHub MCP** — verifier reads PR/CI state without exec
-4. **Knowledge-graph MCP** — L3 knowledge/index.md upgraded to queryable graph
-5. **Sequential-thinking** — skeptic structured reasoning traces
+| Gap | Winner (free) | Roles |
+|---|---|---|
+| Vuln-DB unified | `badchars/supply-chain-mcp-server` (OSV/GHSA/NVD/EPSS/KEV, no key) | attacker, skeptic |
+| SAST via MCP | `semgrep mcp` (built into semgrep ≥1.137) | verifier, attacker |
+| GitHub/CI state | `github/github-mcp-server` (PRs, actions, advisories) | supervisor, verifier, editor |
+| Knowledge graph | `@modelcontextprotocol/server-memory` | supervisor, skeptic, writer |
+| Reasoning ledger | `server-sequential-thinking` | skeptic, supervisor |
+| Research | exa ✅ already present + firecrawl (keyless) | researcher |
+
+Adoption rule (governance): pin version, read-only where possible, add tool
+names to `tool-inventory.txt` (P5 blocks unlisted tools), owner approves
+each server before wiring into `.devin/agents/*/AGENT.md` allowed-tools.
 
 ## Notes
 
