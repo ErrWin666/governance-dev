@@ -29,12 +29,14 @@ certain approaches failed.
 | ERR-019 | Self-lockout: broken .rego shipped post-seal = total governance shutdown | lifecycle | recovered — atomic patch+seal + `opa check` rules binding |
 | ERR-020 | `mv` out of a protected path not counted as a write (analyzer takes only last arg) | bypass | fixed in-flight (parallel session) — verified live 2026-11-11 |
 | ERR-021 | Interpreter-script channel (`python3 file.py`) bypasses all path policies; ACL backstop covers only policies/*.rego | bypass (architectural) | open — documented residual, fix options pending owner |
-| ERR-022 | p15 audit_targets = 3 files; `logs/b1.0-discovery.log` and future logs forgeable | coverage gap | open |
+| ERR-022 | p15 audit_targets = 3 files; `logs/b1.0-discovery.log` and future logs forgeable | coverage gap | fixed 2026-11-11 — `logs/*.log` suffix match |
 | ERR-023 | `wsl.exe` spawn fails 0xC0000142 intermittently → fail-closed stall | environment/transport | documented — research: `docs/WSL_SPAWN_RELIABILITY.md` |
 | ERR-024 | Findings have a validity window in multi-session repos (concurrent fixes) | process | documented — re-verify rule binding |
 | ERR-025 | tool-inventory drift: `read_subagent` & peers denied by p5 | coverage gap | fixed 2026-11-11 — split merged line |
 | ERR-026 | `C:\path` backslash bypass — bashlex strips `\`, seg_match misses | bypass | fixed 2026-11-11 — union-parse, live re-denied |
-| ERR-027 | Malformed hook command (`/c/Windows/System32//c/...`) → global 127 fail-closed in new sessions | lockout | open — owner edits config; fix: `/c/PROGRA~1/Git/bin/bash.exe` |
+| ERR-027 | Malformed hook command (`/c/Windows/System32//c/...`) → global 127 fail-closed in new sessions | lockout | config fixed by owner (`/c/PROGRA~1/`); R3 session ran on native hooks — verified |
+| ERR-028 | Self-repair loop: unverified patches + seal blind spots + infra-flake misdiagnosis (~6 consecutive repair-inflicted incidents) | lifecycle/bypass/infra | fixed 2026-11-11 — `policies/bin/repair.py` certified channel + gate.sh hardening; 44/44 tests |
+| — | Hostile audit F1–F16: `main.rego`→exit 0, fake-OPA via `$HOME/.local/bin`, writable approvals/STATE/evidence, phantom tests.lock, ~15 exec vectors | audit batch | tracked: `docs/audits/HOSTILE_AUDIT_2026-11-11.md` — owner decisions D1–D7 |
 
 ## File locations
 - ERR-004..ERR-017: this directory
