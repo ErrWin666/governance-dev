@@ -19,7 +19,8 @@ mcp__context7__resolve-library-id
 mcp__*
 web_search
 get_output
-todo_writeread_subagent
+todo_write
+read_subagent
 write_to_process
 code_search
 find_file_by_name

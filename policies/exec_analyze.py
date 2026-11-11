@@ -31,9 +31,16 @@ def words_of(node):
 
 def analyze(text, depth=0):
     cmds, writes, cds = [], set(), []
-    try:
-        trees = bashlex.parse(text)
-    except Exception:
+    # bashlex strips \ inside quoted strings — "C:\governance-dev\policies\x"
+    # becomes a slashless C:governance-devpoliciesx that defeats seg_match.
+    # Parse both raw and backslash-normalized text, union the results.
+    trees = []
+    for t in {text, text.replace("\\", "/")}:
+        try:
+            trees += bashlex.parse(t)
+        except Exception:
+            pass
+    if not trees:
         return None
     for tree in trees:
         for n in walk(tree):
