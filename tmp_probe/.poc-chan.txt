@@ -1,0 +1,1 @@
+poc: wrote into protected logs/ via python3-script channel

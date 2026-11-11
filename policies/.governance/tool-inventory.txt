@@ -19,4 +19,13 @@ mcp__context7__resolve-library-id
 mcp__*
 web_search
 get_output
-todo_write
+todo_writeread_subagent
+write_to_process
+code_search
+find_file_by_name
+ask_user_question
+request_scope
+mcp_list_servers
+mcp_call_tool
+mcp_read_resource
+notebook_read

@@ -34,3 +34,7 @@ Owner: approved in-session, 2026-11-10 (text approval — per ERR-001 interim me
 | A-009 | 2026-11-10 | ACKNOWLEDGED: L4.4+L4.5 adversarial reviews | Verifier/Skeptic/Attacker all DISPUTED exec-gate completeness — 15+9 holes found, criticals fixed (9b29641, 9a30751); documented residuals are clause-18 detection-tier. Armed attacker proved SAST (semgrep, 690 rules) misses logic holes the agent found. |
 
 Owner: approved in-session, 2026-11-10 (text approval — per ERR-001 interim mechanism)
+
+| A-010 | 2026-11-10 | BATCH: L1–L4 residual disposition — owner signs once | **Closed by fix**: L1-11 notebook_edit (verified in all 8 policies), L3-08 P14, X-04 runbook shipped, L4-03 verdict contract, #9 README rewritten + R1 src/ exec barrier = HARD (documented).<br>**Acknowledged as accepted/deferred**: L1-01 admin bypass (dev repo), L1-02 CLI auth, L1-04/05 exec+hook residuals, L1-10/12 exec+exfil residual tier, L2-01 SonarQube (now in tool-adoption plan), L2-02/03 JS+Go adapters deferred to L6 project, L3-03 A-001 never recorded — historical, noted here as record, L3-07 current_phase=B6 correct per A-007, X-03 closed by this row, X-06 conventions accepted, L4-04 mutation-gate stays at L2 scope, SELF-01/02 await L5+owner seeds, R3 profile-enforcement test = fresh-session task, R4 self-reseal + R5 indirection = L5 scope.<br>**L1–L4 status after this row**: every gap is either closed-with-evidence or owner-acknowledged residual. |
+
+Owner: ⏳ AWAITING — sign by replacing this line with your approval

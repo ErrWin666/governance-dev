@@ -6,14 +6,22 @@ package governance
 
 import rego.v1
 
-audit_targets := {"logs/gate.log", "logs/b1.0-pretool.log", "policies/exec_analyze.py"}
-
 deny contains msg if {
 	input.tool_name in {"write", "edit", "notebook_edit"}
 	p := audit_path
-	some t in audit_targets
-	endswith(p, t)
-	msg := sprintf("P15-AUDIT-FORGERY: %s writes protected audit/analyzer file %s", [input.tool_name, t])
+	audit_hit(p)
+	msg := sprintf("P15-AUDIT-FORGERY: %s writes protected audit/analyzer file %s", [input.tool_name, p])
+}
+
+# ERR-022: filename allowlist missed b1.0-discovery.log and future logs —
+# protect logs/*.log by suffix (patch scripts stay writable as .py/.json).
+audit_hit(p) if {
+	endswith(p, "policies/exec_analyze.py")
+}
+
+audit_hit(p) if {
+	contains(p, "logs/")
+	endswith(p, ".log")
 }
 
 audit_path := p if {

@@ -61,10 +61,12 @@ def analyze(text, depth=0):
                         writes.add(w)
                 elif verb == "git" and rest and rest[0] in GIT_WRITE_SUBS:
                     writes |= {w for w in rest[1:] if not w.startswith("-")}
-                elif verb in {"cp", "mv"}:
+                elif verb == "cp":
                     nf = [w for w in rest if not w.startswith("-")]
                     if nf:
                         writes.add(nf[-1])
+                elif verb == "mv":
+                    writes |= {w for w in rest if not w.startswith("-")}
                 elif verb == "find" and any(f in rest for f in ("-exec", "-execdir", "-ok")):
                     for f in ("-exec", "-execdir", "-ok"):
                         if f in rest:
@@ -95,12 +97,13 @@ def analyze(text, depth=0):
                 out.add(os.path.normpath(os.path.join(WORK, cd, w)))
     return cmds, out
 
-try:
-    text = sys.stdin.read()
-    res = analyze(text)
-    if res is None:
+if __name__ == "__main__":
+    try:
+        text = sys.stdin.read()
+        res = analyze(text)
+        if res is None:
+            print('{"ok":false}')
+        else:
+            print(json.dumps({"ok": True, "commands": res[0], "writes": sorted(res[1])}))
+    except Exception:
         print('{"ok":false}')
-    else:
-        print(json.dumps({"ok": True, "commands": res[0], "writes": sorted(res[1])}))
-except Exception:
-    print('{"ok":false}')

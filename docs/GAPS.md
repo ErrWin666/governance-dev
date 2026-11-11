@@ -11,7 +11,7 @@
 | GAP-L1-02 | `devin -p --config` dormant bypass — blocked only by CLI auth wall | One auth state flips a full bypass (ERR-009) | Detection only | YES — accept risk or restrict CLI auth |
 | GAP-L1-03 | `permissions.deny` is dead code | Anyone relying on it has no protection (ERR-008) | Never rely on it — documented | no |
 | GAP-L1-04 | Local exec of destructive commands — detectable not preventable | Fail-open seam in the Devin hook contract | Audit log review; Managed Devins at L5 | YES — accept or isolate work |
-| GAP-L1-11 | `notebook_edit` missing from P4 + P8 tool matchers (present in P12/P4c) — .ipynb writes bypass evidence + sensitive-file rules | one-line matcher additions | none | no |
+| ~~GAP-L1-11~~ ✅ CLOSED | `notebook_edit` verified present in all 8 policy files (p2/p3/p4/p4c/p8/p12/p14/p15) — stale audit row | — | — | **closed** 2026-11-10 |
 | GAP-L1-12 | P10 exfil doesn't inspect `exec` — outbound via curl/wget/scp/nc uninspected | extend P10 tool list | P3 catches literal secrets in command text | YES — same decision as L1-10 |
 | GAP-L1-10 | **exec bypasses ALL path/write policies** — MITIGATED: p13_exec_write_paths.rego denies exec write-ops on protected paths (heuristic, evadable) + policies.lock integrity seal + 12/12 `opa test` vectors. Residual: interpreter/obfuscation evasion + P10 exec-exfil (L1-12) | audit + seal = detection tier per clause 18 | proven live + semantic tests | YES — accept residual or harden |
 | GAP-L1-05 | WSL/cygheap/hook crash → fail_closed locks the owner out | Proven live today: hook crash (`-1073741502`) blocked a plain `read` | Manual recovery (STATE.md §7) | YES — accept fragility or invest in watchdog |
@@ -25,7 +25,7 @@
 | GAP-L2-18 | naming-consistency rule unenforced | needs per-language convention config on a real project | DEFERRED to L6/first governed project | yes |
 | GAP-L2-19 | process circular-deps + deadlock + non-converging loops (rules 28/29 process half) | no reviewer/implementer roles exist to run a loop | DEFERRED — blocked by L4/L5; A9 gives early signal only | yes |
 | ~~GAP-L3-04~~ | cold-resume never fully tested — RESOLVED: fresh session rebuilt state + found 6 drift items (stale seals, tasks.md, current_phase, STATE.md, debris, GAPS lag) | — | — | **closed — PASSED with findings** |
-| GAP-L3-08 | **write/edit tools can write `plan/*.approved`** — p13 blocks exec redirects to `.approved` but the write tool has no equivalent rule → seal forgery possible via write/edit | seals are approval artifacts | new rule matching `.approved` for write/edit/notebook_edit (keep interim mechanism: only owner-marked sessions may write) | yes — new L3 finding |
+| ~~GAP-L3-08~~ ✅ CLOSED | P14 deny-seal-forgery shipped + merged (PR #10): write/edit/notebook_edit of `*.approved` denied | — | — | **closed** |
 | GAP-L1-09 | Supply-chain dep check + obfuscated-secret detection uncovered | Documented holes (ROADMAP §6) | deferred by design | YES — when to schedule |
 
 ## L2 — Quality
@@ -64,11 +64,11 @@
 
 | Gap ID | Missing | Why it matters | Workaround | Owner decision? |
 |---|---|---|---|---|
-| GAP-L4-01 | Entire layer: verifier, skeptic, attacker roles | **Clever Hans is unguarded — the stated core gap** | A5/B5 mutation gates only | YES — when to start (after gaps close) |
-| GAP-L4-02 | antemortem / citation lint not installed | No fabricated-claim detection exists | none | no |
-| GAP-L4-03 | verdict.json / in-toto evidence format not implemented | Manifests remain self-asserted JSON (REASSESSMENT top gap #1) | none | no |
+| GAP-L4-01 | L4 in progress: 8 roles authored, 5 custom `.devin/agents/` profiles, verifier+skeptic+attacker+editor live evidence (l4-1/4/5/6 handoffs) | Role profiles' `allowed-tools` enforcement unproven (R3) | handoff protocol proven | PARTIAL — profile verification pending |
+| ~~GAP-L4-02~~ | Citation discipline implemented via role contracts (file:line required, "no citation = UNVERIFIABLE" in VERDICT_CONTRACT.md) | deterministic lint not built | contract-level | partial |
+| ~~GAP-L4-03~~ ✅ CLOSED | `roles/VERDICT_CONTRACT.md` + verdict.json in every l4-* handoff | — | — | **closed** |
 | GAP-L4-04 | Mutation-gate-on-touched-tests at L4 scope | Decided (Q9), not built — partially covered by A5/B5 | L2 mutation gates | no |
-| GAP-L4-05 | No verifier input contract implementation | ROADMAP §9-3 default never implemented | none | no |
+| GAP-L4-05 | Verifier input contract = TASK.md + evidence bundle (l4-* handoffs) | Working form exists; formal schema not sealed | handoffs proven | partial |
 
 ## L5 — Orchestration
 
@@ -90,7 +90,7 @@
 | ~~GAP-X-01~~ ✅ CLOSED | GOVERNANCE_SPEC moved to repo root + bumped to v2.0 with correction log (2026-11-09, commit 3055748); dead Rule 21 retired | — | — | — |
 | ~~GAP-X-02~~ ✅ CLOSED | tree committed; only owner-file `current_phase` remains untracked | — | — | — |
 | GAP-X-03 | approval.md holds only A-002; README references A-001 that does not exist; approvals are interim text (ERR-001 mechanism) | Approval record is thinner than the docs imply | keep A-XXX discipline | no |
-| GAP-X-04 | No runbook/how-to docs (Diátaxis gap, REASSESSMENT §3) | Ops knowledge lives in STATE.md §7 only | none | no |
+| ~~GAP-X-04~~ ✅ CLOSED | `docs/RUNBOOK.md` shipped: reseal, lockdown recovery, gate-log reading, provocation test, agent patching | — | — | **closed** 2026-11-10 |
 | GAP-X-05 | No guard against agent overclaiming / phase-jumping | The exact failure mode that triggered this audit | `workflow-guard` skill + WORKFLOW_GUARD.md created today — ADVISORY only, self-invoked; nothing forces it | no — created this session |
 | GAP-X-06 | Spec mechanisms never built: M1 phase-contracts (+`size:` field), M7 CI ERR→test check, M9 `knowledge/`, rules 10/29/30 (coordination-log, review-cycle tracking) | Rules exist on paper with zero machinery | conventions cover intent partially | YES — schedule vs defer |
 
