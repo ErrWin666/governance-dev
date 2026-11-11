@@ -5,8 +5,9 @@ set -u
 ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 JQ=/usr/bin/jq; [ -x "$JQ" ] || JQ=/bin/jq
 PY3=/usr/bin/python3
+OPA=""
 for _b in /usr/bin/opa /usr/local/bin/opa "$HOME/.local/bin/opa"; do [ -x "$_b" ] && "$_b" version >/dev/null 2>&1 && OPA="$_b" && break; done
-[ -f ./policies/main.rego ] || exit 0
+[ -f "$ROOT_DIR/policies/main.rego" ] || exit 0
 
 mkdir -p logs
 PAYLOAD="$(cat)"
