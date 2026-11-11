@@ -42,6 +42,20 @@ Adoption rule (governance): pin version, read-only where possible, add tool
 names to `tool-inventory.txt` (P5 blocks unlisted tools), owner approves
 each server before wiring into `.devin/agents/*/AGENT.md` allowed-tools.
 
+## Round-2 additions (user-owned SonarQube + scanner class — K-006)
+
+| Server | Verdict | Roles | Note |
+|---|---|---|---|
+| `sonarsource/sonarqube-mcp` (OFFICIAL, SSAL) | **Adopt** — needs Server ≥2025.1 | verifier, skeptic, attacker, implementer, supervisor | USER token + `SONARQUBE_URL` + `TELEMETRY_DISABLED=true`; drop write tools (`change_sonar_issue_status`) for read-only roles |
+| SonarQube Web API (curl) | **Adopt as fallback** — any version | verifier, skeptic | `api/qualitygates/project_status`, `api/issues/search`, `api/hotspots/search`; works on pre-2025.1 instances |
+| `aquasecurity/trivy-mcp` (OFFICIAL, MIT) | **Adopt** | attacker, skeptic | `trivy plugin install mcp` → `trivy mcp`; FS/image/IaC/secrets |
+| `dtkmn/mcp-zap-server` (Apache-2.0) | Monitor — only if DAST targets exist | attacker | most security-engineered community scanner MCP (68★) |
+| `dtrack-mcp` / Dependency-Track | Monitor — only if DT deployed | skeptic, attacker | no official DT MCP (OWASP issue #5791 open) |
+| gitleaks/Nuclei/Bearer/Checkmarx/Veracode MCPs | Skip | — | CLI-first or paywalled; wrappers add risk for zero gain |
+
+**Gate question for owner:** SonarQube instance version (`GET /api/server/version`)
+decides official-MCP vs Web-API path — ≤2024.x instances get the curl path.
+
 ## Notes
 
 - `corridor` purpose unknown — probe `mcp_list_tools` before documenting further.
