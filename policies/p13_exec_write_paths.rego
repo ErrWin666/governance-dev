@@ -77,7 +77,33 @@ blocked_commands := {"dd", "socat", "nc", "ncat", "netcat", "scp", "sftp", "rsyn
 protected_hit(t) if {
 	p := lower(replace(t, "\\", "/"))
 	some pat in protected_paths
-	contains(concat("", [p, "/"]), pat)
+	seg_match(p, pat)
+}
+
+# segment-boundary match — kills substring over-deny (verifier:
+# mystate.md/x.approved.bak) while still hitting nested paths.
+seg_match(p, pat) if {
+	pt := trim_suffix(pat, "/")
+	pad := concat("", [" ", p, " "])
+	contains(pad, concat("", [" ", pt, " "]))
+}
+
+seg_match(p, pat) if {
+	pt := trim_suffix(pat, "/")
+	pad := concat("", [" ", p, " "])
+	contains(pad, concat("", [" ", pt, "/"]))
+}
+
+seg_match(p, pat) if {
+	pt := trim_suffix(pat, "/")
+	pad := concat("", [" ", p, " "])
+	contains(pad, concat("", ["/", pt, " "]))
+}
+
+seg_match(p, pat) if {
+	pt := trim_suffix(pat, "/")
+	pad := concat("", [" ", p, " "])
+	contains(pad, concat("", ["/", pt, "/"]))
 }
 
 segments_after_op(c) := [trim_space(p) |
@@ -99,7 +125,7 @@ protected_paths := {"policies/", "approvals/", "evidence/", "state.md", "tests.l
 
 seg_contains_protected(seg) if {
 	some p in protected_paths
-	contains(seg, p)
+	seg_match(seg, p)
 }
 
 seg_starts_protected(seg) if {

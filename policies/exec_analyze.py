@@ -8,6 +8,7 @@ import bashlex
 WRITE_VERBS = {"rm", "cp", "mv", "install", "dd", "tee", "truncate",
                "touch", "patch", "nano", "vim", "vi", "code", "sed"}
 ROOT = sys.argv[1] if len(sys.argv) > 1 else os.getcwd()
+WORK = sys.argv[2] if len(sys.argv) > 2 and sys.argv[2] else ROOT
 GIT_WRITE_SUBS = {"checkout", "restore", "apply", "clean", "am", "reset", "commit-tree"}
 MAX_DEPTH = 6
 
@@ -64,9 +65,23 @@ def analyze(text, depth=0):
                     nf = [w for w in rest if not w.startswith("-")]
                     if nf:
                         writes.add(nf[-1])
+                elif verb == "find" and any(f in rest for f in ("-exec", "-execdir", "-ok")):
+                    for f in ("-exec", "-execdir", "-ok"):
+                        if f in rest:
+                            i = rest.index(f)
+                            inner = [w for w in rest[i + 1:] if w not in {";", "\\;", "+"}]
+                            if inner:
+                                cmds.append(os.path.basename(inner[0]))
+                                writes |= {w for w in inner[1:] if not w.startswith("-")}
+                            break
+                elif verb == "xargs":
+                    nf = [w for w in rest if not w.startswith("-") and "=" not in w]
+                    if nf:
+                        cmds.append(os.path.basename(nf[0]))
+                        writes |= set(nf[1:])
                 elif verb in WRITE_VERBS - {"sed", "cp", "mv"}:
                     writes |= {w for w in rest if not w.startswith("-")}
-            elif n.kind == "redirect" and n.type in {">", ">>", "&>", "<>"}:
+            elif n.kind == "redirect" and n.type in {">", ">>", "&>", "&>>", ">&", "<>"}:
                 out = getattr(n, "output", None)
                 if out and getattr(out, "kind", "") == "word":
                     writes.add(out.word)
@@ -75,9 +90,9 @@ def analyze(text, depth=0):
         if os.path.isabs(w):
             out.add(w)
         else:
-            out.add(os.path.normpath(os.path.join(ROOT, w)))
+            out.add(os.path.normpath(os.path.join(WORK, w)))
             for cd in cds:
-                out.add(os.path.normpath(os.path.join(ROOT, cd, w)))
+                out.add(os.path.normpath(os.path.join(WORK, cd, w)))
     return cmds, out
 
 try:

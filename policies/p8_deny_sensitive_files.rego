@@ -31,3 +31,12 @@ sensitive_match(p, pat) if {
 	contains(p, pat)
 	startswith(pat, "/")
 }
+
+# prefix-family patterns like "secrets." only fire on basename
+# (verifier: endswith(".../secrets.txt","secrets.") never matched)
+sensitive_match(p, pat) if {
+	endswith(pat, ".")
+		parts := split(p, "/")
+	base := parts[count(parts) - 1]
+	startswith(base, pat)
+}

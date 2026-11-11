@@ -13,8 +13,11 @@ deny contains msg if {
 
 deny contains msg if {
 	input.tool_name == "exec"
-	cmd := lower(input.tool_input.command)
+	cmd := norm_cmd(input.tool_input.command)
 	regex.match(`\bwsl(\.exe)?\b`, cmd)
 	regex.match(`(-u\s*=?|-u)\s*root\b|--user\s*=\s*root\b|--user\s+root\b`, cmd)
 	msg := sprintf("P1-WSL-ROOT: wsl invoked as root: %s", [input.tool_input.command])
 }
+
+# strip quotes so -u "root" / --user 'root' cannot evade the root regex
+norm_cmd(c) := lower(replace(replace(c, "\"", ""), "'", ""))

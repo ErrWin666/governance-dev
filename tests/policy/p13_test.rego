@@ -79,6 +79,20 @@ test_allow_add_not_dd if {
 	p13_msgs("git add policies/x.rego") == set()
 }
 
+# --- verifier over-deny regression: substring lookalikes must pass ---
+
+test_allow_mystate if {
+	p13_ast_msgs("anything", {"ok": true, "commands": ["touch"], "writes": ["mystate.md"]}) == set()
+}
+
+test_allow_approved_bak if {
+	p13_ast_msgs("anything", {"ok": true, "commands": ["cp"], "writes": ["x.approved.bak"]}) == set()
+}
+
+test_deny_nested_policies if {
+	p13_ast_msgs("anything", {"ok": true, "commands": ["rm"], "writes": ["/mnt/c/x/policies/y"]}) != set()
+}
+
 # --- AST layer vectors (verifier gap: tests covered fallback only) ---
 # Feed data.env.exec_analysis directly — the same shape exec_analyze.py emits.
 

@@ -23,6 +23,11 @@ printf '%s PWD-PROOF cwd=%s\n' "$(date -Is)" "$(pwd)" >> "$GATE"
 }
 
 # (b) integrity seal: tampered policies = fail closed (GAP-L1-10, owner-sealed)
+[ -f policies/.governance/policies.lock ] || {
+	printf '%s DENY POLICIES-INTEGRITY lock-missing\n' "$(date -Is)" >> "$GATE"
+	echo 'POLICIES-INTEGRITY: policies.lock missing - fail closed' >&2
+	exit 2
+}
 if [ -f policies/.governance/policies.lock ]; then
 	EXP=$(tr -d ' 
 ' < policies/.governance/policies.lock | /usr/bin/tr 'A-F' 'a-f')
@@ -67,7 +72,8 @@ fi
 EXEC_JSON='{}'
 TOOL_NAME=$(printf '%s' "$PAYLOAD" | "$JQ" -r '.tool_name // empty' 2>/dev/null)
 if [ "$TOOL_NAME" = "exec" ]; then
-	EXEC_JSON=$(printf '%s' "$PAYLOAD" | "$JQ" -r '.tool_input.command // empty' | "$PY3" policies/exec_analyze.py "$ROOT_DIR" 2>/dev/null || echo '{"ok":false,"crashed":true}')
+	WD=$(printf '%s' "$PAYLOAD" | "$JQ" -r '.tool_input.workdir // empty' 2>/dev/null)
+	EXEC_JSON=$(printf '%s' "$PAYLOAD" | "$JQ" -r '.tool_input.command // empty' | "$PY3" policies/exec_analyze.py "$ROOT_DIR" "$WD" 2>/dev/null || echo '{"ok":false,"crashed":true}')
 fi
 
 ENVJSON=$("$JQ" -n --argjson inv "$INV" --argjson ft "$FT" --argjson ev "$EVP" --argjson tl "$TL" \
