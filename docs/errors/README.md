@@ -27,12 +27,14 @@ certain approaches failed.
 | ERR-017 | `pull_request.base.sha` frozen at PR-open → checks diffed polluted file set | infrastructure | resolved (base-toggle refreshes; PR #4+#5 merged) |
 | ERR-018 | `numbers.range(1,0)` descends → whole command leaked into P13 path check | rego semantics | fixed (range(0,·)+`i>0` guard; opa test suite added) |
 | ERR-019 | Self-lockout: broken .rego shipped post-seal = total governance shutdown | lifecycle | recovered — atomic patch+seal + `opa check` rules binding |
-| ERR-020 | `mv` out of a protected path not counted as a write (analyzer takes only last arg) | bypass | open — fix designed |
+| ERR-020 | `mv` out of a protected path not counted as a write (analyzer takes only last arg) | bypass | fixed in-flight (parallel session) — verified live 2026-11-11 |
 | ERR-021 | Interpreter-script channel (`python3 file.py`) bypasses all path policies; ACL backstop covers only policies/*.rego | bypass (architectural) | open — documented residual, fix options pending owner |
 | ERR-022 | p15 audit_targets = 3 files; `logs/b1.0-discovery.log` and future logs forgeable | coverage gap | open |
 | ERR-023 | `wsl.exe` spawn fails 0xC0000142 intermittently → fail-closed stall | environment/transport | documented — research: `docs/WSL_SPAWN_RELIABILITY.md` |
 | ERR-024 | Findings have a validity window in multi-session repos (concurrent fixes) | process | documented — re-verify rule binding |
-| ERR-025 | tool-inventory drift: `read_subagent` & peers denied by p5 | coverage gap | open — owner appends names via approvals/ |
+| ERR-025 | tool-inventory drift: `read_subagent` & peers denied by p5 | coverage gap | fixed 2026-11-11 — split merged line |
+| ERR-026 | `C:\path` backslash bypass — bashlex strips `\`, seg_match misses | bypass | fixed 2026-11-11 — union-parse, live re-denied |
+| ERR-027 | Malformed hook command (`/c/Windows/System32//c/...`) → global 127 fail-closed in new sessions | lockout | open — owner edits config; fix: `/c/PROGRA~1/Git/bin/bash.exe` |
 
 ## File locations
 - ERR-004..ERR-017: this directory
